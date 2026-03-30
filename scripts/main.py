@@ -22,4 +22,4 @@ while running:
 
     clock.tick(60)  # FPS limit = 60
 
-pg.quit()
+pg.quit()#coucou
