@@ -64,7 +64,7 @@ class GameObject(metaclass=GameObjectMeta) :
     def destroy(self) :
         GameManager().remove(self)
 
-
+# Zooming objects :
 class ZoomObject(GameObject):
     def __init__(self, image:pg.image, scaling_speed:float=0.5, max_scale:float=3.0, **kwargs):
         super().__init__(**kwargs)  # Mandatory arguments must be in kwargs
@@ -104,8 +104,9 @@ class ZoomBackground(ZoomObject) :
         new_height = int(self.original.get_height() * self.scale)
 
         return pg.transform.smoothscale(self.original, (new_width, new_height))
-        
-class Cockpit(GameObject) :
+
+# Static objects :        
+class StaticObject(GameObject) :
     def __init__(self, image:pg.image, **kwargs):
         super().__init__(**kwargs)
 
