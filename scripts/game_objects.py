@@ -1,4 +1,5 @@
 import pygame as pg
+from itertools import groupby
 
 class GameManager:
     _instance = None
@@ -23,8 +24,14 @@ class GameManager:
             obj.update(dt)
 
     def draw(self, surface: pg.Surface):
-        for obj in self._objects:
-            obj.draw(surface)
+        for layer_idx, objs_in_layer in groupby(sorted(self._objects, key=lambda o: o.layer_idx), key=lambda o: o.layer_idx):
+            objs_list = list(objs_in_layer)
+            
+            if layer_idx == 1:  # Garbage layer
+                objs_list.reverse()  # First spawned obstacle is drawn last -> appears in front
+            
+            for obj in objs_list:
+                obj.draw(surface)
 
 class GameObjectMeta(type):
     '''Metaclass that auto-registers all GameObject subclasses.'''
@@ -39,8 +46,19 @@ class GameObjectMeta(type):
 class GameObject(metaclass=GameObjectMeta) :
     '''GameObject is a superclass from which all objects that need update() and draw() methods will inherit.
     Instances are auto-registered on creation.'''
+    def __init__(self, **kwargs) :
+        mandatory_arguments = ['layer_idx', 'screen_size']
+        for arg in mandatory_arguments :
+            if arg not in kwargs:
+                # Force argument to be given when creating an object :
+                raise ValueError(f"{arg} argument is required for Game Objects !")
+            setattr(self, arg, kwargs.pop(arg))
+        
+        self.screen_width, self.screen_height = self.screen_size
+        
     def update(self, dt:float):
-        raise NotImplementedError("Subclass must implement update()")
+        # print("WARNING : Most GameObject subclasses must implement update() !")
+        pass
 
     def draw(self, surface:pg.surface):
         raise NotImplementedError("Subclass must implement draw()")
@@ -49,9 +67,11 @@ class GameObject(metaclass=GameObjectMeta) :
         GameManager().remove(self)
 
 class ZoomBackground(GameObject):
-    def __init__(self, image:pg.image, screen_size:tuple, scaling_speed:float=0.005, max_scale:float=10.0):
+    def __init__(self, image:pg.image, scaling_speed:float=0.005, max_scale:float=10.0, **kwargs):
+        super().__init__(**kwargs)  # Mandatory arguments must be in kwargs
+
         self.original = image
-        self.screen_width, self.screen_height = screen_size
+        # self.screen_width, self.screen_height = self.screen_size
 
         self.scaling_speed = scaling_speed
         self.max_scale = max_scale
@@ -78,3 +98,14 @@ class ZoomBackground(GameObject):
 
         surface.blit(scaled, rect)
         
+class Cockpit(GameObject) :
+    def __init__(self, image:pg.image, **kwargs):
+        super().__init__(**kwargs)
+
+        self.image = image
+
+        # self.screen_width, self.screen_height = self.screen_size
+
+    def draw(self, surface):
+        rect = self.image.get_rect(center = (self.screen_width // 2, self.screen_height // 2))
+        surface.blit(self.image, rect)

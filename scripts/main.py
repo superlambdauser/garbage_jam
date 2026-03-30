@@ -3,6 +3,12 @@ import game_objects as go
 
 SCREEN_WIDTH = 1200
 SCREEN_HEIGHT = 600
+SCREEN_SIZE = (SCREEN_WIDTH, SCREEN_HEIGHT)
+
+BACKGROUND_LAYER = 0
+GARBAGE_LAYER = 1
+COCKPIT_LAYER = 2
+BUTTONS_LAYER = 3
 
 # Pygame setup :
 pg.init()
@@ -11,10 +17,13 @@ clock = pg.time.Clock()
 running = True
 
 # Files :
-bg_image = pg.image.load("assets/background.png").convert() # Auto converts image in the most suitable format for pygame to run smoothly
+bg_image = pg.image.load("assets/background.png").convert_alpha()
+cockpit_image = pg.image.load("assets/cockpit.png").convert_alpha()
+
 # Game objects :
 game = go.GameManager()
-zoom_bg = go.ZoomBackground(bg_image, (SCREEN_WIDTH, SCREEN_HEIGHT))
+zoom_bg = go.ZoomBackground(image=bg_image, screen_size=SCREEN_SIZE, layer_idx=BACKGROUND_LAYER)
+cockpit = go.Cockpit(image=cockpit_image, screen_size=SCREEN_SIZE, layer_idx=COCKPIT_LAYER)
 
 
 while running:
