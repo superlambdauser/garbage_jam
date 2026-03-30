@@ -2,7 +2,7 @@ import pygame as pg
 
 # pygame setup
 pg.init()
-screen = pg.display.set_mode((1600, 1200))
+screen = pg.display.set_mode((1200, 600))
 clock = pg.time.Clock()
 running = True
 
