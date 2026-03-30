@@ -26,12 +26,11 @@ game = go.GameManager()
 zoom_bg = go.ZoomBackground(image=bg_image, screen_size=SCREEN_SIZE, layer_idx=BACKGROUND_LAYER)
 cockpit = go.StaticObject(image=cockpit_image, screen_size=SCREEN_SIZE, layer_idx=COCKPIT_LAYER)
 
-
 while running:
     dt = clock.tick(60) / 1000 # FPS limit = 60, divided by 1000 to get speed in seconds instead of milliseconds
     
     for event in pg.event.get(): 
-        if event.type == pg.QUIT: # pg.QUIT event means the user clicked X to close your window
+        if event.type == pg.QUIT: # pg.QUIT event means the user clicked X to close window
             running = False
             pg.quit() 
 

@@ -1,0 +1,7 @@
+- Boutons :
+    classe bouton 
+        is_on : False
+        if is_on : give a direction (or be wild)
+    reset after each garbage spawn
+
+- Garbage : 

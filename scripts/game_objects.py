@@ -34,7 +34,6 @@ class GameManager:
 
 class GameObjectMeta(type):
     '''Metaclass that auto-registers all GameObject subclasses.'''
-    _registry: list = []
     def __call__(cls, *args, **kwargs):
         instance = super().__call__(*args, **kwargs)
 
@@ -42,7 +41,7 @@ class GameObjectMeta(type):
         return instance
 
 class GameObject(metaclass=GameObjectMeta) :
-    '''GameObject is a superclass from which all objects that need update() and draw() methods will inherit.
+    '''GameObject is a superclass from which all objects that need update() and/or draw() methods will inherit.
     Instances are auto-registered on creation.'''
     def __init__(self, **kwargs) :
         mandatory_arguments = ['layer_idx', 'screen_size'] 
@@ -66,7 +65,15 @@ class GameObject(metaclass=GameObjectMeta) :
 
 # Zooming objects :
 class ZoomObject(GameObject):
-    def __init__(self, image:pg.image, scaling_speed:float=0.5, max_scale:float=3.0, **kwargs):
+    def __init__(self, image:pg.image, scaling_speed:float=0.03, max_scale:float=3.0, **kwargs):
+        """
+        Args:
+            image (pg.image) : the image to zoom in
+            scaling_speed (float) : zoom speed (default = 0.03)
+            max_scale (float) : maximum zoom level (default = 3.0)
+            layer_idx (int) : layer group of the object. (passed to GameObject via **kwargs)
+            screen_size (int, int) : size of the screen (passed to GameObject via ** kwargs)
+        """
         super().__init__(**kwargs)  # Mandatory arguments must be in kwargs
 
         self.original = image
@@ -97,6 +104,14 @@ class ZoomObject(GameObject):
 
 class ZoomBackground(ZoomObject) :
     def __init__(self, **kwargs):
+        """
+        Args:
+            image (pg.image) : the image to zoom in. (passed to ZoomObject via **kwargs)
+            scaling_speed (float) : zoom speed (default = 0.03). (passed to ZoomObject via **kwargs)
+            max_scale (float) : maximum zoom level (default = 3.0) (passed to ZoomObject via **kwargs)
+            layer_idx (int) : layer group of the object. (passed to GameObject via **kwargs)
+            screen_size ((int, int)) : size of the screen (passed to GameObject via ** kwargs)
+        """
         super().__init__(**kwargs)
 
     def zoom(self) :
@@ -105,8 +120,27 @@ class ZoomBackground(ZoomObject) :
 
         return pg.transform.smoothscale(self.original, (new_width, new_height))
 
+class ZoomGarbage(ZoomObject) :
+    def __init__(self, rotation_speed:float, **kwargs):
+        """
+        Args:
+            rotation_speed (float) : roation speed of the object.
+            image (pg.image) : the image to zoom in. (passed to ZoomObject via **kwargs)
+            scaling_speed (float) : zoom speed (default = 0.03). (passed to ZoomObject via **kwargs)
+            max_scale (float) : maximum zoom level (default = 3.0) (passed to ZoomObject via **kwargs)
+            layer_idx (int) : layer group of the object. (passed to GameObject via **kwargs)
+            screen_size ((int, int)) : size of the screen (passed to GameObject via ** kwargs)
+        """
+        super().__init__(**kwargs)
+
 # Static objects :        
 class StaticObject(GameObject) :
+    """
+    Args:
+        image (pg.image): image to display
+        layer_idx (int) : layer group of the object. (passed to GameObject via **kwargs)
+        screen_size ((int, int)) : size of the screen (passed to GameObject via ** kwargs)
+    """
     def __init__(self, image:pg.image, **kwargs):
         super().__init__(**kwargs)
 
