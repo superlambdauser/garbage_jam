@@ -149,3 +149,4 @@ class StaticObject(GameObject) :
     def draw(self, surface) :
         rect = self.image.get_rect(center = (self.screen_width // 2, self.screen_height // 2))
         surface.blit(self.image, rect)
+

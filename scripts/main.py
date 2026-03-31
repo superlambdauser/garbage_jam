@@ -20,11 +20,13 @@ running = True
 # Files :
 bg_image = pg.image.load("assets/background.png").convert_alpha()
 cockpit_image = pg.image.load("assets/cockpit.png").convert_alpha()
+red_button_image = pg.image.load("assets/red_button.png").convert_alpha()
 
 # Game objects :
 game = go.GameManager()
 zoom_bg = go.ZoomBackground(image=bg_image, screen_size=SCREEN_SIZE, layer_idx=BACKGROUND_LAYER)
 cockpit = go.StaticObject(image=cockpit_image, screen_size=SCREEN_SIZE, layer_idx=COCKPIT_LAYER)
+red_button = go.StaticObject(image=red_button_image, screen_size=SCREEN_SIZE, layer_idx=COCKPIT_LAYER)
 
 while running:
     dt = clock.tick(60) / 1000 # FPS limit = 60, divided by 1000 to get speed in seconds instead of milliseconds
