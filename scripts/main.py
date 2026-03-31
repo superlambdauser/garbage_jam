@@ -23,8 +23,11 @@ cockpit_image = pg.image.load("assets/cockpit.png").convert_alpha()
 
 # Game objects :
 game = go.GameManager()
-zoom_bg = go.ZoomBackground(image=bg_image, screen_size=SCREEN_SIZE, layer_idx=BACKGROUND_LAYER)
-cockpit = go.StaticObject(image=cockpit_image, screen_size=SCREEN_SIZE, layer_idx=COCKPIT_LAYER)
+game.set_screen_size(SCREEN_SIZE)
+
+zoom_bg = go.ZoomBackground(image=bg_image, layer_idx=BACKGROUND_LAYER)
+
+cockpit = go.StaticObject(image=cockpit_image, layer_idx=COCKPIT_LAYER)
 
 while running:
     dt = clock.tick(60) / 1000 # FPS limit = 60, divided by 1000 to get speed in seconds instead of milliseconds
