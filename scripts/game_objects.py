@@ -19,13 +19,14 @@ class GameManager:
         self._objects.append(obj)
 
     def remove(self, obj: "GameObject"):
-        self._objects.remove(obj)
+        if obj in self._objects:
+            self._objects.remove(obj)
 
     def clear_all(self):
         self._objects.clear()
 
     def update(self, dt: float):
-        for obj in self._objects:
+        for obj in self._objects : 
             obj.update(dt)
 
     def draw(self, surface: pg.Surface):
@@ -46,7 +47,8 @@ class GameObjectMeta(type):
                 raise RuntimeError("Call GameManager.set_screen_size() before creating GameObjects!")
             kwargs['screen_size'] = GameManager._screen_size
         instance = super().__call__(*args, **kwargs)
-        GameManager().add(instance)
+        instance.manager = GameManager()
+        instance.manager.add(instance)
         return instance
 
 class GameObject(metaclass=GameObjectMeta) :
@@ -72,68 +74,91 @@ class GameObject(metaclass=GameObjectMeta) :
     def destroy(self) :
         GameManager().remove(self)
 
-# Zooming objects :
-class ZoomObject(GameObject):
-    def __init__(self, image:pg.image, scaling_speed:float=0.03, max_scale:float=3.0, **kwargs):
-        """
+class DisplayImageObject(GameObject) :
+    def __init__(self, image:pg.image, position:tuple=None, **kwargs):
+        """GameObject subclass for objects requiring an image to be displayed.
+
         Args:
-            image (pg.image) : the image to zoom in
-            scaling_speed (float) : zoom speed (default = 0.03)
-            max_scale (float) : maximum zoom level (default = 3.0)
-            layer_idx (int) : layer group of the object. (passed to GameObject via **kwargs)
-            screen_size (int, int) : size of the screen (passed to GameObject via ** kwargs)
+            image (pg.image): Image to display
+            position (tuple, optional): Spawning position. Defaults to center of the screen.
         """
-        super().__init__(**kwargs)  # Mandatory arguments must be in kwargs
+        super().__init__(**kwargs)
 
         self.original = image
+
+        if position is not None :
+            self.position = position
+        else : 
+            self.position = (self.screen_width // 2, self.screen_height // 2)
+
+# Zooming objects :
+class ZoomingObject(DisplayImageObject):
+    def __init__(self, scaling_speed:float=0.03, max_scale:float=3.0, **kwargs):
+        """
+        Args:
+            scaling_speed (float) : zoom speed (default = 0.03)
+            max_scale (float) : maximum zoom level (default = 3.0)
+            image (pg.image) : the image to zoom in (passed to DisplayImageObject via **kwargs)
+            position (tuple, optional): Spawning position. Defaults to center of the screen. (passed to DisplayImageObject via **kwargs)
+            layer_idx (int) : layer group of the object. (passed to GameObject via **kwargs)
+        """
+        super().__init__(**kwargs)  # Mandatory arguments must be in kwargs
 
         self.scaling_speed = scaling_speed
         self.max_scale = max_scale
 
         # Start at a scale that exactly fills the screen, then zoom in from there
-        self.min_scale = max(
-        self.screen_width / image.get_width(),
-        self.screen_height / image.get_height())
-
-        self.scale = self.min_scale
+        self.scale = 1.0
+        self.min_scale = self.scale
 
     def update(self, dt:float) :
+        super().update(dt)
         self.scale += self.scaling_speed * dt
-
-        if self.scale > self.max_scale :
-            self.scale = self.min_scale  # reset back to "just filling the screen"
     
-    def zoom(self) -> pg.image:
-        raise NotImplementedError("ZoomObjects must implement zoom()")
-
-    def draw(self, surface:pg.surface) :
-        scaled = self.zoom()
-        rect = scaled.get_rect(center = (self.screen_width // 2, self.screen_height // 2))
-        surface.blit(self.zoom(), rect)
-
-class ZoomBackground(ZoomObject) :
-    def __init__(self, **kwargs):
-        """
-        Args:
-            image (pg.image) : the image to zoom in. (passed to ZoomObject via **kwargs)
-            scaling_speed (float) : zoom speed (default = 0.03). (passed to ZoomObject via **kwargs)
-            max_scale (float) : maximum zoom level (default = 3.0) (passed to ZoomObject via **kwargs)
-            layer_idx (int) : layer group of the object. (passed to GameObject via **kwargs)
-            screen_size ((int, int)) : size of the screen (passed to GameObject via ** kwargs)
-        """
-        super().__init__(**kwargs)
-
     def zoom(self) :
         new_width = int(self.original.get_width() * self.scale)
         new_height = int(self.original.get_height() * self.scale)
 
         return pg.transform.smoothscale(self.original, (new_width, new_height))
 
-class ZoomGarbage(ZoomObject) :
-    def __init__(self, rotation_speed:float, **kwargs):
+    def draw(self, surface:pg.surface) :
+        scaled = self.zoom()
+        rect = scaled.get_rect(center=self.position)
+        surface.blit(scaled, rect)
+
+# Rotating objects : 
+class RotatingObject(DisplayImageObject) :
+    def __init__(self, rotation_speed:float=5.0, **kwargs):
         """
         Args:
-            rotation_speed (float) : roation speed of the object.
+            rotation_speed (float, optional): Rotation speed. Defaults to 5.0.
+            position (tuple, optional): Spawn position. Defaults to center of the screen. (passed to DisplayImageObject via **kwargs)
+            image (pg.image) : the image to zoom in (passed to DisplayImageObject via **kwargs)
+            layer_idx (int) : layer group of the object. (passed to GameObject via **kwargs)
+        """
+        super().__init__(**kwargs)
+
+        self.angle = 0.0
+        self.rotation_speed = rotation_speed
+
+    def rotate(self) :
+        return pg.transform.rotate(self.original, self.angle)
+        
+    def update(self, dt):
+        super().update(dt)
+        self.angle += self.rotation_speed * dt
+
+    def draw(self, surface:pg.surface) :
+        rotated = self.rotate()
+        rect = rotated.get_rect(center=self.position)
+        surface.blit(rotated, rect)
+
+class ZoomingRotatingObject(ZoomingObject, RotatingObject) :
+    def __init__(self, **kwargs) :
+        """
+        Args:
+            rotation_speed (float, optional) : roation speed of the object. Defaults to 5.0 (passed to RotateObject via **kwargs)
+            position ((int, int), optional) : Spawn position. Defaults to center of the screen. (passed to RotateObject via **kwargs)
             image (pg.image) : the image to zoom in. (passed to ZoomObject via **kwargs)
             scaling_speed (float) : zoom speed (default = 0.03). (passed to ZoomObject via **kwargs)
             max_scale (float) : maximum zoom level (default = 3.0) (passed to ZoomObject via **kwargs)
@@ -142,19 +167,46 @@ class ZoomGarbage(ZoomObject) :
         """
         super().__init__(**kwargs)
 
+    def update(self, dt):
+        super().update(dt)
+
+    def draw(self, surface:pg.surface) :
+        zommed_rotated = pg.transform.rotate(self.zoom(), self.angle)
+        rect = zommed_rotated.get_rect(center=self.position)
+        surface.blit(zommed_rotated, rect)
+    
 # Static objects :        
-class StaticObject(GameObject) :
-    def __init__(self, image:pg.image, **kwargs):
+class StaticObject(DisplayImageObject) :
+    def __init__(self, **kwargs):
         """
         Args:
-            image (pg.image): image to display
+            image (pg.image): image to display (passed to DisplayImageObject via **kwargs)
+            position ((int, int), optional) : Spawn position. Defautls to center of the screen. (passed to DisplayImageObject via **kwargs) 
             layer_idx (int) : layer group of the object. (passed to GameObject via **kwargs)
             screen_size ((int, int)) : size of the screen (passed to GameObject via ** kwargs)
         """
         super().__init__(**kwargs)
 
-        self.image = image
-
     def draw(self, surface) :
-        rect = self.image.get_rect(center = (self.screen_width // 2, self.screen_height // 2))
-        surface.blit(self.image, rect)
+        rect = self.original.get_rect(center=self.position)
+        surface.blit(self.original, rect)
+
+# Specific behaviours :
+class ZoomingBackground(ZoomingObject) :
+    def __init__(self, scaling_speed = 0.03, max_scale = 3, **kwargs):
+        super().__init__(scaling_speed, max_scale, **kwargs)
+        self.min_scale = self.scale
+
+    def update(self, dt):
+        super().update(dt)
+        if self.scale > self.max_scale :
+            self.scale = self.min_scale  # reset back to "just filling the screen"
+
+class Garbage(ZoomingRotatingObject) :
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+    
+    def update(self, dt):
+        super().update(dt)
+        if self.scale > self.max_scale :
+            self.destroy()
