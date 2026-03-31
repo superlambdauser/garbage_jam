@@ -3,11 +3,17 @@ from itertools import groupby
 
 class GameManager:
     _instance = None
+    _screen_size = None
+
     def __new__(cls):
         if cls._instance is None:
             cls._instance = super().__new__(cls)
             cls._instance._objects = []
         return cls._instance
+    
+    @classmethod
+    def set_screen_size(cls, screen_size:tuple) :
+        cls._screen_size = screen_size
 
     def add(self, obj: "GameObject"):
         self._objects.append(obj)
@@ -35,9 +41,12 @@ class GameManager:
 class GameObjectMeta(type):
     '''Metaclass that auto-registers all GameObject subclasses.'''
     def __call__(cls, *args, **kwargs):
+        if 'screen_size' not in kwargs:
+            if GameManager._screen_size is None:
+                raise RuntimeError("Call GameManager.set_screen_size() before creating GameObjects!")
+            kwargs['screen_size'] = GameManager._screen_size
         instance = super().__call__(*args, **kwargs)
-
-        GameManager().add(instance) # Singleton ensures it's always the same manager
+        GameManager().add(instance)
         return instance
 
 class GameObject(metaclass=GameObjectMeta) :
@@ -135,13 +144,13 @@ class ZoomGarbage(ZoomObject) :
 
 # Static objects :        
 class StaticObject(GameObject) :
-    """
-    Args:
-        image (pg.image): image to display
-        layer_idx (int) : layer group of the object. (passed to GameObject via **kwargs)
-        screen_size ((int, int)) : size of the screen (passed to GameObject via ** kwargs)
-    """
     def __init__(self, image:pg.image, **kwargs):
+        """
+        Args:
+            image (pg.image): image to display
+            layer_idx (int) : layer group of the object. (passed to GameObject via **kwargs)
+            screen_size ((int, int)) : size of the screen (passed to GameObject via ** kwargs)
+        """
         super().__init__(**kwargs)
 
         self.image = image
