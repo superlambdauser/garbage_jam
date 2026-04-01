@@ -42,6 +42,10 @@ class GameScene(scene.Scene) :
             self.spawn_timer = 0
             self.spawn_interval = self.random_interval()
             self.spawn_garbage()
+            
+            
+            
+            
 
     def random_interval(self) :
         return random.uniform(3.0, 5.0)
@@ -54,6 +58,8 @@ class GameScene(scene.Scene) :
     def spawn_garbage(self) :
         garbage_folder = self.assets._base_path + "garbage/"
         random_file = random.choice(os.listdir(garbage_folder))
+        
+        
 
         garbage = Garbage(image=self.assets.get("garbage/" + random_file), position=self.random_position(), layer=GARBAGE_LAYER, scaling_speed=0.1, max_scale=2.5)
         garbage.set_speed(garbage.rotation_speed * random.uniform(-1, 1))
