@@ -39,6 +39,9 @@ class SceneManager :
 
     def switch(self, scene) :
         self.current = scene
+
+    def handle_event(self, event) :
+        self.current.handle_event(event)
     
     def update(self, dt) :
         self.current.update(dt)
@@ -56,6 +59,9 @@ class Scene :
     
     def load(self) :
         raise NotImplementedError("Scenes must implement objects loading method load() !")
+    
+    def handle_event(self, event) :
+        self._manager.handle_event(event)
     
     def update(self, dt) :
         self._manager.update(dt)

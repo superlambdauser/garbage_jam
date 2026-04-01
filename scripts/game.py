@@ -4,17 +4,21 @@ import pygame as pg
 import scene_management as scene
 import game_objects as go
 
-# Scenes :
+# Display :
 SCREEN_WIDTH = 1200
 SCREEN_HEIGHT = 600
 SCREEN_SIZE = (SCREEN_WIDTH, SCREEN_HEIGHT)
 SCREEN_CENTER = (SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2)
 
+#Layers :
 BACKGROUND_LAYER = 0
 GARBAGE_LAYER = 1
 COCKPIT_LAYER = 2
 BUTTONS_LAYER = 3
 
+# Events :
+
+# Scenes :
 class GameScene(scene.Scene) :
 ### ↓ GAME LOGIC HERE ↓ ###
     def __init__(self):
@@ -25,7 +29,7 @@ class GameScene(scene.Scene) :
     def load(self) :
         background = ZoomingBackground(image=self.assets.get("background.png"), position=SCREEN_CENTER, layer=BACKGROUND_LAYER)
         cockpit = go.GameObject(image=self.assets.get("cockpit.png"),position=SCREEN_CENTER, layer=COCKPIT_LAYER)
-        red_button = go.GameObject(image=self.assets.get("buttons/red_button.png"), position=(600, 520), layer=COCKPIT_LAYER)
+        red_button = Button(image=self.assets.get("buttons/red_button.png"), position=(600, 520), layer=COCKPIT_LAYER)
 
         self.current_garbage = self.spawn_garbage()
     
@@ -75,5 +79,12 @@ class Garbage(go.ZoomingRotatingObject):
         if self.scale > self.max_scale:
             # Damage ship
             # ...
-            # Then destroy
+            # Then destroy self
             self.destroy()
+
+class Button(go.ClickableObject) :
+    def on_click(self) :
+        print("clicked")
+        # Button logic
+        # ...
+        pass

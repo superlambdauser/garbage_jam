@@ -23,6 +23,11 @@ class GameManager:
     def clear_all(self) :
         self._group.empty()
 
+    def handle_event(self, event):
+        for sprite in self._group.sprites():
+            if isinstance(sprite, InteractiveObject):
+                sprite.handle_event(event)
+
     def update(self, dt):
         self._group.update(dt)
 
@@ -109,3 +114,38 @@ class ZoomingRotatingObject(ZoomingObject, RotatingObject):
         ))
         self.image = pg.transform.rotate(zoomed, self.angle)
         self.rect = self.image.get_rect(center=self.rect.center)
+
+# Interactive Objects :
+class InteractiveObject(GameObject) :
+    def handle_event(self, event) :
+        raise NotImplementedError("Interactive Objects must implement a handle_event method.")
+
+class ClickableObject(InteractiveObject) : 
+    def handle_event(self, event):
+        if event.type == pg.MOUSEBUTTONDOWN :
+            if self.rect.collidepoint(event.pos) :
+                self.on_click()
+    
+    def on_click() :
+        raise NotImplementedError("Clickable Objects must implement on_click() method.")
+    
+    
+# Visual effects objects :
+class AnimatedObject(GameObject) :
+    def __init__(self, images:list, position, layer):
+        super().__init__(images[0], position, layer) #Initializes Sprite with first image of the list
+
+    def animate(self) :
+        raise NotImplementedError("Animated objects must implements animate() method.")
+    
+class HoverEffectObject(GameObject) :
+    def __init__(self, hover_image, image, position, layer):
+        super().__init__(image, position, layer)
+        self.original = image
+        self.hover_image = hover_image
+
+    def hover_effect(self) :
+        if self.rect.collidepoint(pg.mouse.get_pos()) :
+            self.image = self.hover_image
+        else : 
+            self.image = self.original

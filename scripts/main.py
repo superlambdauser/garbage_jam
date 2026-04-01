@@ -28,6 +28,7 @@ while running:
     for event in pg.event.get():
         if event.type == pg.QUIT:
             running = False
+        scenes.handle_event(event)
 
     screen.fill((0,0,0))
     scenes.update(dt)
