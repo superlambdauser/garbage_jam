@@ -52,7 +52,7 @@ class GameScene(scene.Scene) :
         garbage_folder = self.assets._base_path + "garbage/"
         random_file = random.choice(os.listdir(garbage_folder))
 
-        Garbage(image=self.assets.get("garbage/" + random_file), position=self.random_position(), layer=GARBAGE_LAYER, scaling_speed=0.4, max_scale=2.5)
+        Garbage(image=self.assets.get("garbage/" + random_file), position=self.random_position(), layer=GARBAGE_LAYER, scaling_speed=0.1, max_scale=2.5)
 
 class MenuScene(scene.Scene) :
     def load(self) :
