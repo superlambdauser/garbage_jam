@@ -90,6 +90,9 @@ class RotatingObject(GameObject):
         self.angle = 0.0
         self.rotation_speed = rotation_speed
 
+    def set_speed(self, speed:float) :
+        self.rotation_speed = speed 
+
     def update(self, dt: float):
         self.angle += self.rotation_speed * dt
         self.image = pg.transform.rotate(self.original, self.angle)
