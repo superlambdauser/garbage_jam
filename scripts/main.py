@@ -26,24 +26,22 @@ garbage_image = pg.image.load("assets/garbage/fresh_fish.png").convert_alpha() #
 
 # Game objects :
 game = go.GameManager()
-game.set_screen_size(SCREEN_SIZE)
-zoom_bg = go.ZoomingBackground(image=bg_image, screen_size=SCREEN_SIZE, layer_idx=BACKGROUND_LAYER)
-cockpit = go.StaticObject(image=cockpit_image, screen_size=SCREEN_SIZE, layer_idx=COCKPIT_LAYER)
-red_button = go.StaticObject(image=red_button_image, screen_size=SCREEN_SIZE, layer_idx=COCKPIT_LAYER, position=(600,520))
 
-garbage = go.Garbage(image=garbage_image, layer_idx=GARBAGE_LAYER, scaling_speed=0.5, max_scale=2.5) ### TEMP
+zoom_bg = go.ZoomingBackground(image=bg_image, position=(SCREEN_WIDTH//2, SCREEN_HEIGHT//2), layer=BACKGROUND_LAYER, scaling_speed=0.03, max_scale=3.0)
+cockpit = go.GameObject(image=cockpit_image, position=(SCREEN_WIDTH//2, SCREEN_HEIGHT//2), layer=COCKPIT_LAYER)
+red_button = go.GameObject(image=red_button_image, position=(600, 520), layer=COCKPIT_LAYER)
+garbage = go.Garbage(image=garbage_image, position=(SCREEN_WIDTH//2, SCREEN_HEIGHT//2), layer=GARBAGE_LAYER, scaling_speed=0.5, max_scale=2.5)
 
 while running:
-    dt = clock.tick(60) / 1000 # FPS limit = 60, divided by 1000 to get speed in seconds instead of milliseconds
-    
-    for event in pg.event.get(): 
-        if event.type == pg.QUIT: # pg.QUIT event means the user clicked X to close window
-            running = False
-            pg.quit() 
+    dt = clock.tick(60) / 1000
 
+    for event in pg.event.get():
+        if event.type == pg.QUIT:
+            running = False
+
+    screen.fill((0, 0, 0))
     game.update(dt)
     game.draw(screen)
-
-    pg.display.flip() # Update screen 
+    pg.display.flip()
 
 pg.quit() #coucou
