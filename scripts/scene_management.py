@@ -28,7 +28,7 @@ class AssetsManager:
 # Scenes :
 class SceneManager :
     _instance = None
-    
+
     def __new__(cls): # Singleton pattern
         if cls._instance is None:
             cls._instance = super().__new__(cls)
@@ -47,18 +47,18 @@ class SceneManager :
         self.current.draw(surface)
 
 class Scene :
-    manager = go.GameManager()
-    assets = AssetsManager()
+    _manager = go.GameManager()
 
     def __init__(self):
-        self.manager.clear_all()
+        self._manager.clear_all()
+        self.assets = AssetsManager()
         self.load()
     
     def load(self) :
         raise NotImplementedError("Scenes must implement objects loading method load() !")
     
     def update(self, dt) :
-        self.manager.update(dt)
+        self._manager.update(dt)
     
     def draw(self, surface) :
-        self.manager.draw(surface)
+        self._manager.draw(surface)
