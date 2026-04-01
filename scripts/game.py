@@ -30,8 +30,10 @@ class GameScene(scene.Scene) :
         background = ZoomingBackground(image=self.assets.get("background.png"), position=SCREEN_CENTER, layer=BACKGROUND_LAYER)
         cockpit = go.GameObject(image=self.assets.get("cockpit.png"),position=SCREEN_CENTER, layer=COCKPIT_LAYER)
         red_button = Button(image=self.assets.get("buttons/red_button.png"), position=(600, 520), layer=COCKPIT_LAYER)
-        interactive_button_one = Button(image=self.assets.get("buttons/interactive_buttons1.1.png"), position=(900,520),layer=COCKPIT_LAYER)
-
+        clickable_one = Button(image=self.assets.get("buttons/interactive_buttons1.1.png"), position=(850,520),layer=COCKPIT_LAYER)
+        clickable_two = Button(image=self.assets.get("buttons/interactive_buttons2.1.png"), position=(700,550),layer=COCKPIT_LAYER)
+        clickable_three = Button(image=self.assets.get("buttons/interactive_buttons3.1.png"), position=(500,550),layer=COCKPIT_LAYER)
+        clickable_four = Button(image=self.assets.get("buttons/interactive_buttons4.1.png"), position=(230,430),layer=COCKPIT_LAYER)
         self.current_garbage = self.spawn_garbage()
     
     def update(self, dt):
