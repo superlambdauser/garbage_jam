@@ -2,12 +2,15 @@ import pygame as pg
 
 # GameManager → pg.sprite.LayeredUpdates
 class GameManager:
+    """
+    Singleton instance wrapping LayeredUpdates() instance and custom behaviours.    
+    """
     _instance = None
 
-    def __new__(cls):
+    def __new__(cls): # Singleton pattern
         if cls._instance is None:
             cls._instance = super().__new__(cls)
-            cls._instance._group = pg.sprite.LayeredUpdates()  # ← composition not inheritance
+            cls._instance._group = pg.sprite.LayeredUpdates()
         return cls._instance
 
     def add(self, sprite, layer):
@@ -22,9 +25,16 @@ class GameManager:
     def remove(self, sprite):
         self._group.remove(sprite)
 
-# GameObject → pg.sprite.Sprite
+# GameObject
 class GameObject(pg.sprite.Sprite):
     def __init__(self, image: pg.Surface, position: tuple, layer: int):
+        """Wrapper for Sprite() objects.
+
+        Args:
+            image (pg.Surface): Image to display
+            position (tuple): Spawn position
+            layer (int): Display layer
+        """
         super().__init__()
         self.image = image
         self.rect = image.get_rect(center=position)
@@ -33,9 +43,14 @@ class GameObject(pg.sprite.Sprite):
     def destroy(self):
         self.kill()
 
-
 class ZoomingObject(GameObject):
     def __init__(self, scaling_speed: float = 0.03, max_scale: float = 3.0, **kwargs):
+        """Object that zooms in (positive speed) or out (negative speed) over time.
+
+        Args:
+            scaling_speed (float, optional): Zooming speed. Must be set negative for a zooming out behaviour. Defaults to 0.03.
+            max_scale (float, optional): Maximum scaling before reset/destroy/other behaviours trigger. Defaults to 3.0.
+        """
         super().__init__(**kwargs)
         self.original = self.image
         self.scale = 1.0
@@ -52,6 +67,13 @@ class ZoomingObject(GameObject):
 
 class RotatingObject(GameObject):
     def __init__(self, rotation_speed: float = 5.0, **kwargs):
+        """Objects that rotate over time.
+        Positive speed = anti-clockwise direction.
+        Negative speed = clockwise direction.
+
+        Args:
+            rotation_speed (float, optional): Rotation speed. Defaults to 5.0.
+        """
         super().__init__(**kwargs)
         self.original = self.image
         self.angle = 0.0
