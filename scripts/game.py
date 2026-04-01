@@ -1,3 +1,5 @@
+import os
+import random
 import pygame as pg
 import scene_management as scene
 import game_objects as go
@@ -16,13 +18,41 @@ COCKPIT_LAYER = 2
 BUTTONS_LAYER = 3
 
 class GameScene(scene.Scene) :
+    def __init__(self):
+        super().__init__()
+        self.spawn_timer = 0
+        self.spawn_interval = self.random_interval()
+
     def load(self) :
         background = ZoomingBackground(image=self.assets.get("background.png"), position=SCREEN_CENTER, layer=BACKGROUND_LAYER)
         cockpit = go.GameObject(image=self.assets.get("cockpit.png"),position=SCREEN_CENTER, layer=COCKPIT_LAYER)
         red_button = go.GameObject(image=self.assets.get("red_button.png"), position=(600, 520), layer=COCKPIT_LAYER)
 
-        ###TEMP
-        garbage = Garbage(image=self.assets.get("garbage/fresh_fish.png"), position=SCREEN_CENTER, layer=GARBAGE_LAYER, scaling_speed=0.5, max_scale=2.5)
+        self.current_garbage = self.spawn_garbage()
+    
+    def update(self, dt):
+        super().update(dt)
+
+        # Respawning garbage logic :
+        self.spawn_timer += dt
+        if self.spawn_timer >= self.spawn_interval :
+            self.spawn_timer = 0
+            self.spawn_interval = self.random_interval()
+            self.spawn_garbage()
+
+    def random_interval(self) :
+        return random.uniform(3.0, 5.0)
+    
+    def random_position(self) :
+        x = random.randrange(100, 1000)
+        y = random.randrange(150, 300)
+        return (x, y)
+    
+    def spawn_garbage(self) :
+        garbage_folder = self.assets._base_path + "garbage/"
+        random_file = random.choice(os.listdir(garbage_folder))
+
+        Garbage(image=self.assets.get("garbage/" + random_file), position=self.random_position(), layer=GARBAGE_LAYER, scaling_speed=0.4, max_scale=2.5)
 
 class MenuScene(scene.Scene) :
     def load(self) :

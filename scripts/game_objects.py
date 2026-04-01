@@ -17,7 +17,8 @@ class GameManager:
         self._group.add(sprite, layer=layer)
 
     def remove(self, sprite):
-        self._group.remove(sprite)
+        if sprite in self._group :
+            self._group.remove(sprite)
 
     def clear_all(self) :
         self._group.empty()
@@ -26,7 +27,14 @@ class GameManager:
         self._group.update(dt)
 
     def draw(self, surface):
-        self._group.draw(surface)
+        for layer in self._group.layers():
+            layer_sprites = self._group.get_sprites_from_layer(layer)
+            
+            if layer == 1:  # Garbage layer
+                layer_sprites = list(reversed(layer_sprites))
+            
+            for sprite in layer_sprites:
+                surface.blit(sprite.image, sprite.rect)
 
 # GameObject
 class GameObject(pg.sprite.Sprite):
