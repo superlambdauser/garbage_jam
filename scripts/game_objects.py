@@ -16,14 +16,17 @@ class GameManager:
     def add(self, sprite, layer):
         self._group.add(sprite, layer=layer)
 
+    def remove(self, sprite):
+        self._group.remove(sprite)
+
+    def clear_all(self) :
+        self._group.empty()
+
     def update(self, dt):
         self._group.update(dt)
 
     def draw(self, surface):
         self._group.draw(surface)
-
-    def remove(self, sprite):
-        self._group.remove(sprite)
 
 # GameObject
 class GameObject(pg.sprite.Sprite):
@@ -95,19 +98,3 @@ class ZoomingRotatingObject(ZoomingObject, RotatingObject):
         ))
         self.image = pg.transform.rotate(zoomed, self.angle)
         self.rect = self.image.get_rect(center=self.rect.center)
-
-class ZoomingBackground(ZoomingObject) :
-    def __init__(self, scaling_speed = 0.03, max_scale = 3, **kwargs):
-        super().__init__(scaling_speed, max_scale, **kwargs)
-        self.min_scale = self.scale
-
-    def update(self, dt):
-        super().update(dt)
-        if self.scale > self.max_scale :
-            self.scale = self.min_scale
-
-class Garbage(ZoomingRotatingObject):
-    def update(self, dt):
-        super().update(dt)
-        if self.scale > self.max_scale:
-            self.destroy()
