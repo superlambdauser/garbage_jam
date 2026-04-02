@@ -5,3 +5,10 @@
     reset after each garbage spawn
 
 - Garbage : 
+    if garbage scale > max scale : 
+        ship hit (ship pv -= 1 + load cracklings on cockpit)
+        destroy garbage 
+    else if reticles cross position at garbage :
+        if red button pressed :
+            garbage destroy
+        garbage counter += 1
