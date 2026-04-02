@@ -46,11 +46,11 @@ class GameScene(scene.Scene) :
 
         # RETICLE X MOVEMENT :
         clickable_one = Button(images=[self.assets.get("buttons/interactive_buttons1.1.png"),self.assets.get("buttons/interactive_buttons1.2.png")], position=(850,520),layer=BUTTONS_LAYER, reticle=reticle_x, direction=UP) # -> This button moves the reticle_x up
-        clickable_two = Button(images=[self.assets.get("buttons/interactive_buttons2.1.png")], position=(700,550),layer=BUTTONS_LAYER, reticle=reticle_x, direction=DOWN)
-        clickable_three = Button(images=[self.assets.get("buttons/interactive_buttons3.1.png")], position=(500,550),layer=BUTTONS_LAYER, reticle=reticle_x, direction=LEFT)
-        clickable_four = Button(images=[self.assets.get("buttons/interactive_buttons4.1.png")], position=(230,430),layer=BUTTONS_LAYER, reticle=reticle_x, direction=RIGHT)
+        clickable_two = Button(images=[self.assets.get("buttons/interactive_buttons2.1.png"),self.assets.get("buttons/interactive_buttons2.2.png")], position=(700,550),layer=BUTTONS_LAYER, reticle=reticle_x, direction=DOWN)
+        clickable_three = Button(images=[self.assets.get("buttons/interactive_buttons3.1.png"),self.assets.get("buttons/interactive_buttons3.2.png")], position=(500,550),layer=BUTTONS_LAYER, reticle=reticle_x, direction=LEFT)
+        clickable_four = Button(images=[self.assets.get("buttons/interactive_buttons4.1.png"),self.assets.get("buttons/interactive_buttons4.2.png")], position=(230,430),layer=BUTTONS_LAYER, reticle=reticle_x, direction=RIGHT)
 
-        ### !! RED BUTTON = SPECIAL GARBAGE LOGIC
+        ### !! RED BUTTON = SPECIAL GARBAGE LOGIC  --damn ok, no need to scream--
         # red_button = Button(image=self.assets.get("buttons/red_button.png"), position=(600, 520), layer=COCKPIT_LAYER) 
 
         self.current_garbage = self.spawn_garbage()
@@ -66,6 +66,7 @@ class GameScene(scene.Scene) :
             self.spawn_interval = self.random_interval()
             self.spawn_garbage()    
 
+
     def random_interval(self) :
         return random.uniform(3.0, 5.0)
     
@@ -77,7 +78,6 @@ class GameScene(scene.Scene) :
     def spawn_garbage(self) :
         garbage_folder = self.assets._base_path + "garbage/"
         random_file = random.choice(os.listdir(garbage_folder))
-        
         
 
         garbage = Garbage(image=self.assets.get("garbage/" + random_file), position=self.random_position(), layer=GARBAGE_LAYER, scaling_speed=0.1, max_scale=2.5)
@@ -108,10 +108,11 @@ class Garbage(go.ZoomingRotatingObject):
             self.destroy()
 
 class Button(go.AnimatedObject, go.ClickableObject):
-    def __init__(self, images, position, layer, reticle=None, direction:tuple=None):
-        super().__init__(images, position, layer)
+    def __init__(self, images:list, position, layer, reticle=None, direction:tuple=None):
+        super().__init__( images ,position, layer)
         self.reticle = reticle
         self.direction = direction
+        
 
     def update_reticle(self):
         if self.is_clicked:
@@ -124,9 +125,12 @@ class Button(go.AnimatedObject, go.ClickableObject):
 
     def on_click(self) :
         print("clicked")
-        # Button animation logic
+        # Button animation 
+        # cant access these fcking images idk
         # ...
         pass
+        
+        
 
 
 class Reticles(go.GameObject):
