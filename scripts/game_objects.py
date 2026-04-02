@@ -59,6 +59,8 @@ class GameObject(pg.sprite.Sprite):
     def destroy(self):
         self.kill()
 
+
+
 class ZoomingObject(GameObject):
     def __init__(self, scaling_speed: float = 0.03, max_scale: float = 3.0, **kwargs):
         """Object that zooms in (positive speed) or out (negative speed) over time.

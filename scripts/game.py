@@ -29,11 +29,14 @@ class GameScene(scene.Scene) :
     def load(self) :
         background = ZoomingBackground(image=self.assets.get("background.png"), position=SCREEN_CENTER, layer=BACKGROUND_LAYER)
         cockpit = go.GameObject(image=self.assets.get("cockpit.png"),position=SCREEN_CENTER, layer=COCKPIT_LAYER)
-        red_button = Button(image=self.assets.get("buttons/red_button.png"), position=(600, 520), layer=COCKPIT_LAYER)
-        clickable_one = Button(image=self.assets.get("buttons/interactive_buttons1.1.png"), position=(850,520),layer=COCKPIT_LAYER)
-        clickable_two = Button(image=self.assets.get("buttons/interactive_buttons2.1.png"), position=(700,550),layer=COCKPIT_LAYER)
-        clickable_three = Button(image=self.assets.get("buttons/interactive_buttons3.1.png"), position=(500,550),layer=COCKPIT_LAYER)
-        clickable_four = Button(image=self.assets.get("buttons/interactive_buttons4.1.png"), position=(230,430),layer=COCKPIT_LAYER)
+        # red_button = Button(image=self.assets.get("buttons/red_button.png"), position=(600, 520), layer=COCKPIT_LAYER)
+        self.clickable_one = Button(images=[self.assets.get("buttons/interactive_buttons1.1.png"),self.assets.get("buttons/interactive_buttons1.2.png")], position=(850,520),layer=COCKPIT_LAYER)
+        
+        # clickable_two = Button(image=self.assets.get("buttons/interactive_buttons2.1.png"), position=(700,550),layer=COCKPIT_LAYER)
+        # clickable_three = Button(image=self.assets.get("buttons/interactive_buttons3.1.png"), position=(500,550),layer=COCKPIT_LAYER)
+        # clickable_four = Button(image=self.assets.get("buttons/interactive_buttons4.1.png"), position=(230,430),layer=COCKPIT_LAYER)
+        self.reticle_x = Reticles(image=self.assets.get("reticule1.png"),position=(250,250),layer=COCKPIT_LAYER)
+        self.reticle_y = Reticles(image=self.assets.get("reticule2.png"),position=(950,250),layer=COCKPIT_LAYER)
         self.current_garbage = self.spawn_garbage()
     
     def update(self, dt):
@@ -45,7 +48,9 @@ class GameScene(scene.Scene) :
             self.spawn_timer = 0
             self.spawn_interval = self.random_interval()
             self.spawn_garbage()
-            
+        
+        if self.clickable_one.is_clicked:
+            self.reticle_x.move_on_click([0,1])
             
             
             
@@ -91,10 +96,27 @@ class Garbage(go.ZoomingRotatingObject):
             # Then destroy self
             self.destroy()
 
-class Button(go.ClickableObject) :
+class Button(go.AnimatedObject, go.ClickableObject):
+    def __init__(self, images, position, layer):
+        super().__init__(images, position, layer)
+
+        self.is_clicked = False
+    
     def on_click(self) :
         print("clicked")
+        self.is_clicked = True
         # Button logic
-        
+        # move reticle randomly 
         # ...
         pass
+
+
+class Reticles(go.GameObject):
+    def __init__(self, image, position, layer):
+        self.position = position
+        super().__init__(image, position, layer)
+
+    
+    def move_on_click(self,direction:tuple):
+        self.position[0] += direction[0]
+        self.position[1] += direction[1]
