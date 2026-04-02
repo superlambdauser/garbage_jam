@@ -20,6 +20,9 @@ BUTTONS_LAYER = 4
 
 # Reticles directions/speed :
 RETICLE_SPEED = 100.0 # Pixels per millisecond
+### PLEASE DO NOT TOUCH BOUNDS OMG IT WAS HORRIBLE TO SET THX
+RETICLE_BOUNDS_X = (150,1050)
+RETICLE_BOUNDS_Y = (125,375)
 
 # Assets :
 # constants / asset keys
@@ -43,8 +46,8 @@ class GameScene(scene.Scene) :
         cockpit = go.GameObject(image=self.assets.get("cockpit.png"),position=SCREEN_CENTER, layer=COCKPIT_LAYER)
 
         # Reticles :
-        reticle_x = Reticles(image=self.assets.get("reticule1.png"),position=(250,250),layer=RETICLES_LAYER)
-        reticle_y = Reticles(image=self.assets.get("reticule2.png"),position=(950,250),layer=RETICLES_LAYER)
+        reticle_x = Reticles(image=self.assets.get("reticule_x.png"),position=(250,250),layer=RETICLES_LAYER)
+        reticle_y = Reticles(image=self.assets.get("reticule_y.png"),position=(950,250),layer=RETICLES_LAYER)
 
         self.reticles = {
         "reticle_x": reticle_x,
@@ -192,10 +195,23 @@ class Reticles(go.GameObject):
         self.must_move = False
         self.direction = [1, 1]
         self.current_pos = list(self.position)
+
+        self.bounds_x = RETICLE_BOUNDS_X
+        self.bounds_y = RETICLE_BOUNDS_Y
     
     def move_on_click(self, dt, direction):
-        self.current_pos[0] += direction[0] * dt * RETICLE_SPEED
-        self.current_pos[1] += direction[1] * dt * RETICLE_SPEED
+        new_x = self.current_pos[0] + direction[0] * dt * RETICLE_SPEED
+        new_y = self.current_pos[1] + direction[1] * dt * RETICLE_SPEED
+        
+        half_w = self.rect.width // 2
+        half_h = self.rect.height // 2
+
+        # Check if in bounds :
+        if self.bounds_x[0] <= new_x - half_w and new_x + half_w <= self.bounds_x[1]:
+            self.current_pos[0] = new_x
+        if self.bounds_y[0] <= new_y - half_h and new_y + half_h <= self.bounds_y[1]:
+            self.current_pos[1] = new_y
+    
         self.rect.center = self.current_pos
 
     def update(self, dt):

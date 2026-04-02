@@ -52,37 +52,44 @@ BUTTON_CONFIGS = [
     {
         "images": BTN_THREE_IMAGES,
         "position": (500,550),
-        "is_active": False
+        "reticle": "reticle_x",
+        "direction": LEFT
     },
     {
         "images": BTN_FOUR_IMAGES,
         "position": (230,430),
-        "is_active": False
+        "reticle": "reticle_x",
+        "direction": RIGHT
     },
     {
         "images": BTN_FIVE_IMAGES,
         "position": (1000,540),
-        "is_active": False
+        "reticle": "reticle_y",
+        "direction": UP
     },
     {
         "images": BTN_SIX_IMAGES,
         "position": (230,500),
-        "is_active": False
+        "reticle": "reticle_y",
+        "direction": DOWN
     },
     {
         "images": BTN_SEVEN_IMAGES,
         "position": (520,55),
-        "is_active": False
+        "reticle": "reticle_y",
+        "direction": LEFT
     },
     {
         "images": BTN_EIGHT_IMAGES,
         "position": (770,405),
-        "is_active": False
+        "reticle": "reticle_y",
+        "direction": RIGHT
     },
     # DECOYS :
     {
         "images": BTN_NINE_IMAGES,
         "position": (140,550),
-        "is_active": False
+        "reticle": None,
+        "direction": None
     },
 ]
