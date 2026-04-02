@@ -32,8 +32,6 @@ class GameScene(scene.Scene) :
 ### ↓ GAME LOGIC HERE ↓ ###
     def __init__(self):
         super().__init__()
-        self._manager.set_update_order_reverse()
-
         self.spawn_timer = 0
         self.spawn_interval = self.random_interval()
 
@@ -54,7 +52,7 @@ class GameScene(scene.Scene) :
 
         ### !! RED BUTTON = SPECIAL GARBAGE LOGIC
         # red_button = Button(image=self.assets.get("buttons/red_button.png"), position=(600, 520), layer=COCKPIT_LAYER) 
-        
+
         self.current_garbage = self.spawn_garbage()
 
     
@@ -110,7 +108,7 @@ class Garbage(go.ZoomingRotatingObject):
             self.destroy()
 
 class Button(go.AnimatedObject, go.ClickableObject):
-    def __init__(self, images, position, layer, reticle, direction:tuple=(0, 0)):
+    def __init__(self, images, position, layer, reticle=None, direction:tuple=None):
         super().__init__(images, position, layer)
         self.reticle = reticle
         self.direction = direction
@@ -121,7 +119,8 @@ class Button(go.AnimatedObject, go.ClickableObject):
             self.reticle.direction = self.direction
 
     def update(self, dt):
-        self.update_reticle()
+        if self.reticle :
+            self.update_reticle()
 
     def on_click(self) :
         print("clicked")
@@ -138,7 +137,6 @@ class Reticles(go.GameObject):
         self.current_pos = list(self.position)
     
     def move_on_click(self, dt, direction):
-        print(f"moving! dt={dt}, direction={direction}, pos={self.current_pos}")
         self.current_pos[0] += direction[0] * dt * RETICLE_SPEED
         self.current_pos[1] += direction[1] * dt * RETICLE_SPEED
         self.rect.center = self.current_pos
