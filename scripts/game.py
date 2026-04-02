@@ -25,8 +25,12 @@ RIGHT = (1, 0)
 UP = (0, -1)
 DOWN = (0, 1)
 
-# Events :
-
+# Assets :
+# constants / asset keys
+BTN_ONE_IMAGES = ["buttons/interactive_buttons1.1.png", "buttons/interactive_buttons1.2.png"]
+BTN_TWO_IMAGES = ["buttons/interactive_buttons2.1.png", "buttons/interactive_buttons2.2.png"]
+BTN_THREE_IMAGES = ["buttons/interactive_buttons3.1.png", "buttons/interactive_buttons3.2.png"]
+BTN_FOUR_IMAGES = ["buttons/interactive_buttons4.1.png", "buttons/interactive_buttons4.2.png"]
 # Scenes :
 class GameScene(scene.Scene) :
 ### ↓ GAME LOGIC HERE ↓ ###
@@ -45,10 +49,30 @@ class GameScene(scene.Scene) :
         reticle_y = Reticles(image=self.assets.get("reticule2.png"),position=(950,250),layer=RETICLES_LAYER)
 
         # RETICLE X MOVEMENT :
-        clickable_one = Button(images=[self.assets.get("buttons/interactive_buttons1.1.png"),self.assets.get("buttons/interactive_buttons1.2.png")], position=(850,520),layer=BUTTONS_LAYER, reticle=reticle_x, direction=UP) # -> This button moves the reticle_x up
-        clickable_two = Button(images=[self.assets.get("buttons/interactive_buttons2.1.png"),self.assets.get("buttons/interactive_buttons2.2.png")], position=(700,550),layer=BUTTONS_LAYER, reticle=reticle_x, direction=DOWN)
-        clickable_three = Button(images=[self.assets.get("buttons/interactive_buttons3.1.png"),self.assets.get("buttons/interactive_buttons3.2.png")], position=(500,550),layer=BUTTONS_LAYER, reticle=reticle_x, direction=LEFT)
-        clickable_four = Button(images=[self.assets.get("buttons/interactive_buttons4.1.png"),self.assets.get("buttons/interactive_buttons4.2.png")], position=(230,430),layer=BUTTONS_LAYER, reticle=reticle_x, direction=RIGHT)
+        clickable_one_x = Button(images=[self.assets.get(img) for img in BTN_ONE_IMAGES],
+                                position=(850,520),
+                                layer=BUTTONS_LAYER, 
+                                reticle=reticle_x, 
+                                direction=UP
+                                ) # -> This button moves the reticle_x up
+        
+        clickable_two_x = Button(images=[self.assets.get(img) for img in BTN_ONE_IMAGES],
+                                position=(700,550),
+                                layer=BUTTONS_LAYER,
+                                reticle=reticle_x, 
+                                direction=DOWN)
+        
+        clickable_three_x = Button(images=[self.assets.get(img) for img in BTN_ONE_IMAGES], 
+                                 position=(500,550),
+                                 layer=BUTTONS_LAYER, 
+                                 reticle=reticle_x, 
+                                 direction=LEFT)
+        
+        clickable_four_x = Button(images=[self.assets.get(img) for img in BTN_ONE_IMAGES], 
+                                position=(230,430),
+                                layer=BUTTONS_LAYER, 
+                                reticle=reticle_x, 
+                                direction=RIGHT)
 
         ### !! RED BUTTON = SPECIAL GARBAGE LOGIC  --damn ok, no need to scream--
         # red_button = Button(image=self.assets.get("buttons/red_button.png"), position=(600, 520), layer=COCKPIT_LAYER) 
@@ -108,7 +132,7 @@ class Garbage(go.ZoomingRotatingObject):
             self.destroy()
 
 class Button(go.AnimatedObject, go.ClickableObject):
-    def __init__(self, images:list, position, layer, reticle=None, direction:tuple=None):
+    def __init__(self, images:list, position:tuple, layer, reticle=None, direction:tuple=None):
         super().__init__( images ,position, layer)
         self.reticle = reticle
         self.direction = direction
@@ -129,9 +153,6 @@ class Button(go.AnimatedObject, go.ClickableObject):
         # cant access these fcking images idk
         # ...
         pass
-        
-        
-
 
 class Reticles(go.GameObject):
     def __init__(self, image, position, layer):
