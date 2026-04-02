@@ -143,6 +143,18 @@ class ClickableObject(InteractiveObject) :
     def on_click() :
         raise NotImplementedError("Clickable Objects must implement on_click() method.")
     
+class SnappingObject(GameObject) :
+    def __init__(self, image, position, layer):
+        super().__init__(image, position, layer)
+        self.threshold = 0 # Defaults to no snapping
+
+    def snap_to(self, target:GameObject) :
+        self.set_position(target.rect.center)
+    
+    def is_near(self, target: GameObject, threshold:float) :
+        a = pg.math.Vector2(self.rect.center)
+        b = pg.math.Vector2(target.rect.center)
+        return a.distance_to(b) <= threshold
     
 # Visual effects objects :
 class AnimatedObject(GameObject) :

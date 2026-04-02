@@ -19,11 +19,13 @@ COCKPIT_LAYER = 3
 BUTTONS_LAYER = 4
 
 # Reticles directions/speed :
-RETICLE_SPEED = 100.0 # Pixels per millisecond
+RETICLE_SPEED = 200.0 # Pixels per millisecond
+RETICLE_SNAPPING_THRESHOLD = 20.0
 ### PLEASE DO NOT TOUCH BOUNDS OMG IT WAS HORRIBLE TO SET THX
 RETICLE_BOUNDS_X = (150,1050)
 RETICLE_BOUNDS_Y = (125,375)
-
+###TEST :
+ret_path = "reticles/"
 # Assets :
 # constants / asset keys
 BTN_ONE_IMAGES = ["buttons/interactive_buttons1.1.png", "buttons/interactive_buttons1.2.png"]
@@ -46,12 +48,12 @@ class GameScene(scene.Scene) :
         cockpit = go.GameObject(image=self.assets.get("cockpit.png"),position=SCREEN_CENTER, layer=COCKPIT_LAYER)
 
         # Reticles :
-        reticle_x = Reticles(image=self.assets.get("reticule_x.png"),position=(250,250),layer=RETICLES_LAYER)
-        reticle_y = Reticles(image=self.assets.get("reticule_y.png"),position=(950,250),layer=RETICLES_LAYER)
+        self.reticle_x = Reticles(image=self.assets.get(ret_path + "reticule_x.png"),position=(250,250),layer=RETICLES_LAYER)
+        self.reticle_y = Reticles(image=self.assets.get(ret_path + "reticule_y.png"),position=(950,250),layer=RETICLES_LAYER)
 
         self.reticles = {
-        "reticle_x": reticle_x,
-        "reticle_y": reticle_y,
+        "reticle_x": self.reticle_x,
+        "reticle_y": self.reticle_y,
         }
         
         # Buttons :
@@ -73,6 +75,10 @@ class GameScene(scene.Scene) :
     def update(self, dt):
         super().update(dt)
 
+        # Snapping reticles :
+        if self.reticle_x.is_near(target=self.reticle_y, threshold=RETICLE_SNAPPING_THRESHOLD) and not self.reticle_x.linked :
+            self.reticle_x.snap_to(self.reticle_y)
+
         # Respawning garbage logic :
         self.spawn_timer += dt
         if self.spawn_timer >= self.spawn_interval :
@@ -80,7 +86,7 @@ class GameScene(scene.Scene) :
             self.spawn_interval = self.random_interval()
             self.spawn_garbage()    
 
-        #if garbage destroy : reset_buttons (later)
+        #if garbage destroy : reset_buttons (later), reset reticles pos
 
     # Garbage 
     def random_interval(self) :
@@ -189,7 +195,7 @@ class RedButton(Button) :
     # Garbage destruction button
     pass
 
-class Reticles(go.GameObject):
+class Reticles(go.SnappingObject):
     def __init__(self, image, position, layer):
         super().__init__(image, position, layer)
         self.must_move = False
@@ -198,6 +204,8 @@ class Reticles(go.GameObject):
 
         self.bounds_x = RETICLE_BOUNDS_X
         self.bounds_y = RETICLE_BOUNDS_Y
+
+        self.linked = None
     
     def move_on_click(self, dt, direction):
         new_x = self.current_pos[0] + direction[0] * dt * RETICLE_SPEED
@@ -214,11 +222,14 @@ class Reticles(go.GameObject):
     
         self.rect.center = self.current_pos
 
+        if self.linked:
+            self.linked.current_pos = self.current_pos.copy()
+            self.linked.rect.center = self.linked.current_pos
+
     def update(self, dt):
         if self.must_move :
             self.move_on_click(dt, self.direction)
         self.must_move = False
-
 
     def set_position(self, position):
         self.current_pos = list(position)
@@ -226,3 +237,14 @@ class Reticles(go.GameObject):
     
     def reset_position(self):
         self.set_position(self.position)
+
+    def snap_to(self, target):
+        # Linking both so controls are shared between reticles :
+        self.linked = target
+        target.linked = self
+        self.set_position(target.rect.center)
+
+    def unlink(self) :
+        if self.linked :
+            self.linked.linked = None
+            self.linked = None

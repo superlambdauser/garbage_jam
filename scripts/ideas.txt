@@ -12,3 +12,4 @@
         if red button pressed :
             garbage destroy
         garbage counter += 1
+    AND also when garbage destroyed, reticles repop randomly on screen ?
