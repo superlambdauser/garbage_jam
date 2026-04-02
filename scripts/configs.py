@@ -5,10 +5,17 @@ UP = (0, -1)
 DOWN = (0, 1)
 
 # Frames lists :
-BTN_ONE_IMAGES = ["buttons/interactive_buttons1.1.png", "buttons/interactive_buttons1.2.png"]
-BTN_TWO_IMAGES = ["buttons/interactive_buttons2.1.png", "buttons/interactive_buttons2.2.png"]
-BTN_THREE_IMAGES = ["buttons/interactive_buttons3.1.png", "buttons/interactive_buttons3.2.png"]
-BTN_FOUR_IMAGES = ["buttons/interactive_buttons4.1.png", "buttons/interactive_buttons4.2.png"]
+BTN_ONE_IMAGES = ["buttons/interactive_buttons1.1.png", 
+                  "buttons/interactive_buttons1.2.png"]
+
+BTN_TWO_IMAGES = ["buttons/interactive_buttons2.1.png", 
+                  "buttons/interactive_buttons2.2.png"]
+
+BTN_THREE_IMAGES = ["buttons/interactive_buttons3.1.png", 
+                    "buttons/interactive_buttons3.2.png"]
+
+BTN_FOUR_IMAGES = ["buttons/interactive_buttons4.1.png", 
+                   "buttons/interactive_buttons4.2.png"]
 
 # Configs :
 BUTTON_CONFIGS = [

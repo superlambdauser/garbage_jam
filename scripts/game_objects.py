@@ -1,6 +1,6 @@
 import pygame as pg
 
-# GameManager → pg.sprite.LayeredUpdates
+# GameManager (wrapper for pg.sprite.LayeredUpdates)
 class GameManager:
     """
     Singleton instance wrapping LayeredUpdates() instance and custom behaviours.    
@@ -68,8 +68,6 @@ class GameObject(pg.sprite.Sprite):
     def destroy(self):
         self.kill()
 
-
-
 class ZoomingObject(GameObject):
     def __init__(self, scaling_speed: float = 0.03, max_scale: float = 3.0, **kwargs):
         """Object that zooms in (positive speed) or out (negative speed) over time.
@@ -90,7 +88,6 @@ class ZoomingObject(GameObject):
         new_h = int(self.original.get_height() * self.scale)
         self.image = pg.transform.smoothscale(self.original, (new_w, new_h))
         self.rect = self.image.get_rect(center=self.rect.center)  # recentering after scale
-
 
 class RotatingObject(GameObject):
     def __init__(self, rotation_speed: float = 5.0, **kwargs):
@@ -113,7 +110,6 @@ class RotatingObject(GameObject):
         self.angle += self.rotation_speed * dt
         self.image = pg.transform.rotate(self.original, self.angle)
         self.rect = self.image.get_rect(center=self.rect.center)
-
 
 class ZoomingRotatingObject(ZoomingObject, RotatingObject):
     def update(self, dt: float):
@@ -150,11 +146,30 @@ class ClickableObject(InteractiveObject) :
     
 # Visual effects objects :
 class AnimatedObject(GameObject) :
-    def __init__(self, images:list, position, layer):
+    def __init__(self, images:list, position, layer, frame_duration:float=0.1):
         super().__init__(images[0], position, layer) #Initializes Sprite with first image of the list
+        self.images = images
 
-    def animate(self) :
-        raise NotImplementedError("Animated objects must implements animate() method.")
+        self.frame = 0
+        self.frame_timer = 0
+        self.frame_duration = frame_duration  # ms per frame
+
+        self.is_animating = False
+
+    def animate(self, dt):
+        print(f"frame: {self.frame}, timer: {self.frame_timer}, dt: {dt}")
+        self.frame_timer += dt
+        if self.frame_timer >= self.frame_duration:
+            self.frame_timer = 0
+            self.frame += 1
+            if self.frame >= len(self.images): # Reset to idle & end animation
+                self.frame = 0
+                self.is_animating = False
+        self.image = self.images[self.frame]
+
+    def update(self, dt):
+        if self.is_animating:
+            self.animate(dt)
     
 class HoverEffectObject(GameObject) :
     def __init__(self, hover_image, image, position, layer):

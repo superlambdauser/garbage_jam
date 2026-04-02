@@ -3,7 +3,7 @@ import random
 import pygame as pg
 import scene_management as scene
 import game_objects as go
-import scripts.buttons_configs as buttons_configs
+import configs as configs
 
 # Display :
 SCREEN_WIDTH = 1200
@@ -51,22 +51,21 @@ class GameScene(scene.Scene) :
         "reticle_y": reticle_y,
         }
         
+        # Buttons :
         self.buttons = [
-        Button(
-            images=[self.assets.get(img) for img in cfg["images"]],
+        InteractiveButton(images=[self.assets.get(img) for img in cfg["images"]],
             position=cfg["position"],
             layer=BUTTONS_LAYER,
             reticle=reticles.get(cfg.get("reticle")),
             direction=cfg.get("direction")
             ) 
-            for cfg in buttons_configs.BUTTON_CONFIGS
+            for cfg in configs.BUTTON_CONFIGS
         ]
 
         ### !! RED BUTTON = SPECIAL GARBAGE LOGIC  --damn ok, no need to scream--
         # red_button = Button(image=self.assets.get("buttons/red_button.png"), position=(600, 520), layer=COCKPIT_LAYER) 
 
         self.current_garbage = self.spawn_garbage()
-
     
     def update(self, dt):
         super().update(dt)
@@ -120,27 +119,34 @@ class Garbage(go.ZoomingRotatingObject):
             self.destroy()
 
 class Button(go.AnimatedObject, go.ClickableObject):
-    def __init__(self, images:list, position:tuple, layer, reticle=None, direction:tuple=None):
-        super().__init__( images ,position, layer)
+    def __init__(self, images, position, layer, frame_duration:float=0.1, reticle=None, direction:tuple=None):
+        super().__init__(images, position, layer, frame_duration)
         self.reticle = reticle
         self.direction = direction
-        
 
+    def on_click(self) :
+        print(f"images: {len(self.images)}, animating: {self.is_animating}")
+        self.is_animating = True
+        self.frame = 0
+        
+class InteractiveButton(Button) :
     def update_reticle(self):
         if self.is_clicked:
             self.reticle.must_move = True
             self.reticle.direction = self.direction
 
     def update(self, dt):
+        super().update(dt)
+        if self.is_clicked:
+            self.image = self.images[-1] # Image stays on click
+        else:
+            self.image = self.images[0] # Resets to idle on release
+
         if self.reticle :
             self.update_reticle()
 
-    def on_click(self) :
-        print("clicked")
-        # Button animation 
-        # cant access these fcking images idk
-        # ...
-        pass
+class RedButton(Button) :
+    pass
 
 class Reticles(go.GameObject):
     def __init__(self, image, position, layer):
