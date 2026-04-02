@@ -46,7 +46,7 @@ class GameScene(scene.Scene) :
         reticle_x = Reticles(image=self.assets.get("reticule1.png"),position=(250,250),layer=RETICLES_LAYER)
         reticle_y = Reticles(image=self.assets.get("reticule2.png"),position=(950,250),layer=RETICLES_LAYER)
 
-        reticles = {
+        self.reticles = {
         "reticle_x": reticle_x,
         "reticle_y": reticle_y,
         }
@@ -55,12 +55,12 @@ class GameScene(scene.Scene) :
         self.buttons = [
         InteractiveButton(images=[self.assets.get(img) for img in cfg["images"]],
             position=cfg["position"],
-            layer=BUTTONS_LAYER,
-            reticle=reticles.get(cfg.get("reticle")),
-            direction=cfg.get("direction")
+            layer=BUTTONS_LAYER
             ) 
             for cfg in configs.BUTTON_CONFIGS
         ]
+        
+        self.set_random_buttons_active()
 
         ### !! RED BUTTON = SPECIAL GARBAGE LOGIC  --damn ok, no need to scream--
         # red_button = Button(image=self.assets.get("buttons/red_button.png"), position=(600, 520), layer=COCKPIT_LAYER) 
@@ -77,7 +77,9 @@ class GameScene(scene.Scene) :
             self.spawn_interval = self.random_interval()
             self.spawn_garbage()    
 
+        #if garbage destroy : reset_buttons (later)
 
+    # Garbage 
     def random_interval(self) :
         return random.uniform(3.0, 5.0)
     
@@ -90,9 +92,25 @@ class GameScene(scene.Scene) :
         garbage_folder = self.assets._base_path + "garbage/"
         random_file = random.choice(os.listdir(garbage_folder))
         
-
         garbage = Garbage(image=self.assets.get("garbage/" + random_file), position=self.random_position(), layer=GARBAGE_LAYER, scaling_speed=0.1, max_scale=2.5)
         garbage.set_speed(garbage.rotation_speed * random.uniform(-1, 1))
+
+    # Buttons 
+    def set_all_buttons_to_decoys(self) :
+        for button in self.buttons :
+            button.set_to_decoy()
+
+    def set_random_buttons_active(self) :
+        for reticle in self.reticles.values() :
+            for dir in configs.DIRECTIONS :
+                button = random.choice(self.buttons)
+                while button.is_active :
+                    button = random.choice(self.buttons)
+                button.set_active(reticle=reticle, direction=dir)
+    
+    def reset_buttons(self) :
+        self.set_all_buttons_to_decoys()
+        self.set_random_buttons_active()
 
 class MenuScene(scene.Scene) :
     def load(self) :
@@ -119,21 +137,40 @@ class Garbage(go.ZoomingRotatingObject):
             self.destroy()
 
 class Button(go.AnimatedObject, go.ClickableObject):
-    def __init__(self, images, position, layer, frame_duration:float=0.1, reticle=None, direction:tuple=None):
-        super().__init__(images, position, layer, frame_duration)
-        self.reticle = reticle
-        self.direction = direction
-
     def on_click(self) :
         # print(f"images: {len(self.images)}, animating: {self.is_animating}")
         self.is_animating = True
         self.frame = 0
         
 class InteractiveButton(Button) :
+    def __init__(self, images, position, layer, frame_duration:float=0.1):
+        super().__init__(images, position, layer, frame_duration)
+        self.reticle = None
+        self.direction = None
+        self.is_active = False
+
     def update_reticle(self):
         if self.is_clicked:
             self.reticle.must_move = True
             self.reticle.direction = self.direction
+
+    def set_to_decoy(self) :
+        self.reticle = None
+        self.is_active = False
+        # self.reticle.must_move = False
+        # self.reticle.direction = [1, 1]
+        self.direction = None
+
+    def set_active(self, reticle, direction) :
+        self.is_active = True
+        self.set_reticle(reticle)
+        self.set_direction(direction)
+    
+    def set_reticle(self, reticle) :
+        self.reticle = reticle
+    
+    def set_direction(self, direction:tuple) :
+        self.direction = direction
 
     def update(self, dt):
         super().update(dt)

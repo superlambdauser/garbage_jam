@@ -4,6 +4,8 @@ RIGHT = (1, 0)
 UP = (0, -1)
 DOWN = (0, 1)
 
+DIRECTIONS = [LEFT, RIGHT, UP, DOWN]
+
 # Frames lists :
 BTN_ONE_IMAGES = ["buttons/interactive_buttons1.1.png", 
                   "buttons/interactive_buttons1.2.png"]
@@ -50,44 +52,37 @@ BUTTON_CONFIGS = [
     {
         "images": BTN_THREE_IMAGES,
         "position": (500,550),
-        "reticle": "reticle_x",
-        "direction": LEFT
+        "is_active": False
     },
     {
         "images": BTN_FOUR_IMAGES,
         "position": (230,430),
-        "reticle": "reticle_x",
-        "direction": RIGHT
+        "is_active": False
     },
     {
         "images": BTN_FIVE_IMAGES,
         "position": (1000,540),
-        "reticle": "reticle_y",
-        "direction": UP
+        "is_active": False
     },
     {
         "images": BTN_SIX_IMAGES,
         "position": (230,500),
-        "reticle": "reticle_y",
-        "direction": DOWN
+        "is_active": False
     },
     {
         "images": BTN_SEVEN_IMAGES,
         "position": (520,55),
-        "reticle": "reticle_y",
-        "direction": LEFT
+        "is_active": False
     },
     {
         "images": BTN_EIGHT_IMAGES,
         "position": (770,405),
-        "reticle": "reticle_y",
-        "direction": RIGHT
+        "is_active": False
     },
     # DECOYS :
     {
         "images": BTN_NINE_IMAGES,
         "position": (140,550),
-        "reticle": None,
-        "direction": None
+        "is_active": False
     },
 ]
