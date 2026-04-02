@@ -3,7 +3,7 @@ import random
 import pygame as pg
 import scene_management as scene
 import game_objects as go
-import configs
+import scripts.buttons_configs as buttons_configs
 
 # Display :
 SCREEN_WIDTH = 1200
@@ -59,7 +59,7 @@ class GameScene(scene.Scene) :
             reticle=reticles.get(cfg.get("reticle")),
             direction=cfg.get("direction")
             ) 
-            for cfg in configs.BUTTON_CONFIGS
+            for cfg in buttons_configs.BUTTON_CONFIGS
         ]
 
         ### !! RED BUTTON = SPECIAL GARBAGE LOGIC  --damn ok, no need to scream--
