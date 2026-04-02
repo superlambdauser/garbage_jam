@@ -3,6 +3,7 @@ import random
 import pygame as pg
 import scene_management as scene
 import game_objects as go
+import configs
 
 # Display :
 SCREEN_WIDTH = 1200
@@ -19,11 +20,6 @@ BUTTONS_LAYER = 4
 
 # Reticles directions/speed :
 RETICLE_SPEED = 50.0 # Pixels per millisecond
-
-LEFT = (-1, 0)
-RIGHT = (1, 0)
-UP = (0, -1)
-DOWN = (0, 1)
 
 # Assets :
 # constants / asset keys
@@ -45,34 +41,26 @@ class GameScene(scene.Scene) :
     def load(self) :
         background = ZoomingBackground(image=self.assets.get("background.png"), position=SCREEN_CENTER, layer=BACKGROUND_LAYER)
         cockpit = go.GameObject(image=self.assets.get("cockpit.png"),position=SCREEN_CENTER, layer=COCKPIT_LAYER)
+
+        # Reticles :
         reticle_x = Reticles(image=self.assets.get("reticule1.png"),position=(250,250),layer=RETICLES_LAYER)
         reticle_y = Reticles(image=self.assets.get("reticule2.png"),position=(950,250),layer=RETICLES_LAYER)
 
-        # RETICLE X MOVEMENT :
-        clickable_one_x = Button(images=[self.assets.get(img) for img in BTN_ONE_IMAGES],
-                                position=(850,520),
-                                layer=BUTTONS_LAYER, 
-                                reticle=reticle_x, 
-                                direction=UP
-                                ) # -> This button moves the reticle_x up
+        reticles = {
+        "reticle_x": reticle_x,
+        "reticle_y": reticle_y,
+        }
         
-        clickable_two_x = Button(images=[self.assets.get(img) for img in BTN_ONE_IMAGES],
-                                position=(700,550),
-                                layer=BUTTONS_LAYER,
-                                reticle=reticle_x, 
-                                direction=DOWN)
-        
-        clickable_three_x = Button(images=[self.assets.get(img) for img in BTN_ONE_IMAGES], 
-                                 position=(500,550),
-                                 layer=BUTTONS_LAYER, 
-                                 reticle=reticle_x, 
-                                 direction=LEFT)
-        
-        clickable_four_x = Button(images=[self.assets.get(img) for img in BTN_ONE_IMAGES], 
-                                position=(230,430),
-                                layer=BUTTONS_LAYER, 
-                                reticle=reticle_x, 
-                                direction=RIGHT)
+        self.buttons = [
+        Button(
+            images=[self.assets.get(img) for img in cfg["images"]],
+            position=cfg["position"],
+            layer=BUTTONS_LAYER,
+            reticle=reticles.get(cfg.get("reticle")),
+            direction=cfg.get("direction")
+            ) 
+            for cfg in configs.BUTTON_CONFIGS
+        ]
 
         ### !! RED BUTTON = SPECIAL GARBAGE LOGIC  --damn ok, no need to scream--
         # red_button = Button(image=self.assets.get("buttons/red_button.png"), position=(600, 520), layer=COCKPIT_LAYER) 
