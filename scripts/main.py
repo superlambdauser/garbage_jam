@@ -13,7 +13,10 @@ BUTTONS_LAYER = 3
 
 # Pygame setup :
 pg.init()
+
 pg.display.set_caption("Space garbage collector") # Temp title
+pg.display.set_icon(pg.image.load("assets/mop.png")) # lol
+
 screen = pg.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
 clock = pg.time.Clock()
 running = True

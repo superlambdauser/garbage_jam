@@ -86,7 +86,7 @@ class GameScene(scene.Scene) :
             self.spawn_interval = self.random_interval()
             self.spawn_garbage()    
 
-        #if garbage destroy : reset_buttons (later), reset reticles pos
+        #if garbage destroy : reset_buttons (later), reset reticles pos + unlink them
 
     # Garbage 
     def random_interval(self) :
