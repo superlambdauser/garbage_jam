@@ -157,7 +157,6 @@ class AnimatedObject(GameObject) :
         self.is_animating = False
 
     def animate(self, dt):
-        print(f"frame: {self.frame}, timer: {self.frame_timer}, dt: {dt}")
         self.frame_timer += dt
         if self.frame_timer >= self.frame_duration:
             self.frame_timer = 0

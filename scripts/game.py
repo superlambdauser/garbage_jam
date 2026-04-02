@@ -19,7 +19,7 @@ COCKPIT_LAYER = 3
 BUTTONS_LAYER = 4
 
 # Reticles directions/speed :
-RETICLE_SPEED = 50.0 # Pixels per millisecond
+RETICLE_SPEED = 100.0 # Pixels per millisecond
 
 # Assets :
 # constants / asset keys
@@ -125,7 +125,7 @@ class Button(go.AnimatedObject, go.ClickableObject):
         self.direction = direction
 
     def on_click(self) :
-        print(f"images: {len(self.images)}, animating: {self.is_animating}")
+        # print(f"images: {len(self.images)}, animating: {self.is_animating}")
         self.is_animating = True
         self.frame = 0
         

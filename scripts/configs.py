@@ -26,6 +26,12 @@ BTN_SIX_IMAGES = ["buttons/interactive_buttons6.1.png",
 BTN_SEVEN_IMAGES = ["buttons/interactive_buttons7.1.png", 
                    "buttons/interactive_buttons7.2.png"]
 
+BTN_EIGHT_IMAGES = ["buttons/interactive_buttons8.1.png", 
+                   "buttons/interactive_buttons8.2.png"]
+
+BTN_NINE_IMAGES = ["buttons/interactive_buttons9.1.png", 
+                   "buttons/interactive_buttons9.2.png"]
+
 
 # Configs :
 BUTTON_CONFIGS = [
@@ -70,5 +76,18 @@ BUTTON_CONFIGS = [
         "position": (520,55),
         "reticle": "reticle_y",
         "direction": LEFT
+    },
+    {
+        "images": BTN_EIGHT_IMAGES,
+        "position": (770,405),
+        "reticle": "reticle_y",
+        "direction": RIGHT
+    },
+    # DECOYS :
+    {
+        "images": BTN_NINE_IMAGES,
+        "position": (140,550),
+        "reticle": None,
+        "direction": None
     },
 ]
