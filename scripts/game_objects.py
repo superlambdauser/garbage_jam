@@ -11,6 +11,7 @@ class GameManager:
         if cls._instance is None:
             cls._instance = super().__new__(cls)
             cls._instance._group = pg.sprite.LayeredUpdates()
+            cls._instance._update_order = None  # default: layer order
         return cls._instance
 
     def add(self, sprite, layer):
@@ -23,6 +24,10 @@ class GameManager:
     def clear_all(self) :
         self._group.empty()
 
+    # Convenience accessors :
+    def get_all_in_layer(self, layer) -> list:
+        return self._group.get_sprites_from_layer(layer)
+
     def handle_event(self, event):
         for sprite in self._group.sprites():
             if isinstance(sprite, InteractiveObject):
@@ -33,7 +38,7 @@ class GameManager:
 
     def draw(self, surface):
         for layer in self._group.layers():
-            layer_sprites = self._group.get_sprites_from_layer(layer)
+            layer_sprites = self.get_all_in_layer(layer)
             
             if layer == 1:  # Garbage layer
                 layer_sprites = list(reversed(layer_sprites))
@@ -43,7 +48,7 @@ class GameManager:
 
 # GameObject
 class GameObject(pg.sprite.Sprite):
-    def __init__(self, image: pg.Surface, position: tuple, layer: int):
+    def __init__(self, image: pg.Surface, position:tuple, layer: int):
         """Wrapper for Sprite() objects.
 
         Args:
@@ -53,8 +58,12 @@ class GameObject(pg.sprite.Sprite):
         """
         super().__init__()
         self.image = image
+        self.position = position
         self.rect = image.get_rect(center=position)
         GameManager().add(self, layer=layer)
+
+    def update(self, dt:float) :
+        pass
 
     def destroy(self):
         self.kill()
@@ -100,7 +109,7 @@ class RotatingObject(GameObject):
     def set_speed(self, speed:float) :
         self.rotation_speed = speed 
 
-    def update(self, dt: float):
+    def update(self, dt:float):
         self.angle += self.rotation_speed * dt
         self.image = pg.transform.rotate(self.original, self.angle)
         self.rect = self.image.get_rect(center=self.rect.center)
@@ -123,10 +132,17 @@ class InteractiveObject(GameObject) :
         raise NotImplementedError("Interactive Objects must implement a handle_event method.")
 
 class ClickableObject(InteractiveObject) : 
+    def __init__(self, image, position, layer):
+        super().__init__(image, position, layer)
+        self.is_clicked = False
+        
     def handle_event(self, event):
         if event.type == pg.MOUSEBUTTONDOWN :
             if self.rect.collidepoint(event.pos) :
+                self.is_clicked = True
                 self.on_click()
+        elif event.type == pg.MOUSEBUTTONUP :
+            self.is_clicked = False
     
     def on_click() :
         raise NotImplementedError("Clickable Objects must implement on_click() method.")
