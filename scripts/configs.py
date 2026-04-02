@@ -17,6 +17,16 @@ BTN_THREE_IMAGES = ["buttons/interactive_buttons3.1.png",
 BTN_FOUR_IMAGES = ["buttons/interactive_buttons4.1.png", 
                    "buttons/interactive_buttons4.2.png"]
 
+BTN_FIVE_IMAGES = ["buttons/interactive_buttons5.1.png", 
+                   "buttons/interactive_buttons5.2.png"]
+
+BTN_SIX_IMAGES = ["buttons/interactive_buttons6.1.png", 
+                   "buttons/interactive_buttons6.2.png"]
+
+BTN_SEVEN_IMAGES = ["buttons/interactive_buttons7.1.png", 
+                   "buttons/interactive_buttons7.2.png"]
+
+
 # Configs :
 BUTTON_CONFIGS = [
     {
@@ -37,10 +47,28 @@ BUTTON_CONFIGS = [
         "reticle": "reticle_x",
         "direction": LEFT
     },
-        {
+    {
         "images": BTN_FOUR_IMAGES,
         "position": (230,430),
         "reticle": "reticle_x",
         "direction": RIGHT
+    },
+    {
+        "images": BTN_FIVE_IMAGES,
+        "position": (1000,540),
+        "reticle": "reticle_y",
+        "direction": UP
+    },
+    {
+        "images": BTN_SIX_IMAGES,
+        "position": (230,500),
+        "reticle": "reticle_y",
+        "direction": DOWN
+    },
+    {
+        "images": BTN_SEVEN_IMAGES,
+        "position": (520,55),
+        "reticle": "reticle_y",
+        "direction": LEFT
     },
 ]

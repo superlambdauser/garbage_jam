@@ -146,6 +146,7 @@ class InteractiveButton(Button) :
             self.update_reticle()
 
 class RedButton(Button) :
+    # Garbage destruction button
     pass
 
 class Reticles(go.GameObject):
