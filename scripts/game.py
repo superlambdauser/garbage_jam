@@ -1,4 +1,5 @@
 import os
+import math
 import random
 import pygame as pg
 import scene_management as scene
@@ -44,8 +45,15 @@ class GameScene(scene.Scene) :
         self.reticles = []
 
     def load(self) :
-        background = ZoomingBackground(image=self.assets.get("background.png"), position=SCREEN_CENTER, layer=BACKGROUND_LAYER)
-        cockpit = go.GameObject(image=self.assets.get("cockpit.png"),position=SCREEN_CENTER, layer=COCKPIT_LAYER)
+        background = ZoomingBackground(image=self.assets.get("background.png"), 
+                                       position=SCREEN_CENTER, 
+                                       layer=BACKGROUND_LAYER)
+        cockpit = go.GameObject(image=self.assets.get("cockpit.png"),
+                                position=SCREEN_CENTER, 
+                                layer=COCKPIT_LAYER)
+        portrait = HangingPortrait(image=self.assets.get("family_portrait_hanging.png"),
+                                  position=(1000, 80),
+                                  layer=COCKPIT_LAYER )
 
         # Reticles :
         self.reticle_x = Reticles(image=self.assets.get(ret_path + "reticule_x.png"),position=(250,250),layer=RETICLES_LAYER)
@@ -64,6 +72,10 @@ class GameScene(scene.Scene) :
             ) 
             for cfg in configs.BUTTON_CONFIGS
         ]
+        self.red_button = RedButton(images=[self.assets.get(img) for img in configs.RED_BUTTON_CONFIG["images"]],
+                                    position=configs.RED_BUTTON_CONFIG["position"],
+                                    layer=BUTTONS_LAYER)
+        
         
         self.set_random_buttons_active()
 
@@ -115,7 +127,7 @@ class GameScene(scene.Scene) :
                 button = random.choice(self.buttons)
                 while button.is_active :
                     button = random.choice(self.buttons)
-                button.set_active(reticle=reticle, direction=dir)
+                button.set_controls(reticle=reticle, direction=dir)
     
     def reset_buttons(self) :
         self.set_all_buttons_to_decoys()
@@ -146,17 +158,26 @@ class Garbage(go.ZoomingRotatingObject):
             self.destroy()
 
 class Button(go.AnimatedObject, go.ClickableObject):
+    def __init__(self, images, position, layer, frame_duration = 0.1):
+        super().__init__(images, position, layer, frame_duration)
+        self.is_active = False
+
     def on_click(self) :
         # print(f"images: {len(self.images)}, animating: {self.is_animating}")
         self.is_animating = True
         self.frame = 0
+
+    def set_active(self) :
+        self.is_active = True
+    
+    def set_inactive(self) :
+        self.is_active = False
         
 class InteractiveButton(Button) :
     def __init__(self, images, position, layer, frame_duration:float=0.1):
         super().__init__(images, position, layer, frame_duration)
         self.reticle = None
         self.direction = None
-        self.is_active = False
 
     def update_reticle(self):
         if self.is_clicked:
@@ -165,13 +186,11 @@ class InteractiveButton(Button) :
 
     def set_to_decoy(self) :
         self.reticle = None
-        self.is_active = False
-        # self.reticle.must_move = False
-        # self.reticle.direction = [1, 1]
+        self.set_inactive()
         self.direction = None
 
-    def set_active(self, reticle, direction) :
-        self.is_active = True
+    def set_controls(self, reticle, direction):
+        self.set_active()
         self.set_reticle(reticle)
         self.set_direction(direction)
     
@@ -248,3 +267,25 @@ class Reticles(go.SnappingObject):
         if self.linked :
             self.linked.linked = None
             self.linked = None
+
+class HangingPortrait(go.RotatingObject) :
+    def __init__(self, amplitude:float=5, rotation_speed=2, **kwargs):
+        super().__init__(rotation_speed, **kwargs)
+        self.amplitude = amplitude # degrees
+        self.wiggle_speed = rotation_speed #radians per second
+        self.timer = 0.0
+        self.pin = self.original.get_rect(topleft=self.rect.topleft).midtop
+
+    def update(self, dt):
+        self.timer += dt
+        self.angle = self.amplitude * math.sin(self.timer * self.wiggle_speed)
+        
+        # Rotate the image
+        self.image = pg.transform.rotate(self.original, self.angle)
+        
+        # Calculate offset caused by rotation
+        offset = pg.math.Vector2(0, self.original.get_height() / 2)  # distance from pin to center
+        offset.rotate_ip(-self.angle)  # rotate the offset by the same angle
+        
+        # Place rect so the pin stays fixed
+        self.rect = self.image.get_rect(center=self.pin + offset)

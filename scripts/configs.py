@@ -37,7 +37,6 @@ BTN_NINE_IMAGES = ["buttons/interactive_buttons9.1.png",
 BTN_TEN_IMAGES = ["buttons/interactive_buttons10.1.png", 
                    "buttons/interactive_buttons10.2.png"]
 
-
 # Configs :
 BUTTON_CONFIGS = [
     {
@@ -102,3 +101,16 @@ BUTTON_CONFIGS = [
         "direction": None
     },
 ]
+
+
+# RED BUTTON
+RED_BTN_IMAGES = ["buttons/red_button_off.png",
+                  "buttons/red_button_on.png",
+                  "buttons/red_button_pressed.png"]
+
+RED_BUTTON_CONFIG = {
+        "images": RED_BTN_IMAGES,
+        "position": (590, 520),
+        "reticle": "reticle_x",
+        "direction": UP
+    }
