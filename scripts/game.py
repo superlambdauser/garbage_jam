@@ -23,16 +23,12 @@ BUTTONS_LAYER = 4
 RETICLE_SPEED = 200.0 # Pixels per millisecond
 RETICLE_SNAPPING_THRESHOLD = 20.0
 ### PLEASE DO NOT TOUCH BOUNDS OMG IT WAS HORRIBLE TO SET THX
-RETICLE_BOUNDS_X = (150,1050)
-RETICLE_BOUNDS_Y = (125,375)
+RETICLE_BOUNDS_X = (160,1050)
+RETICLE_BOUNDS_Y = (125,370)
+
 ###TEST :
 ret_path = "reticles/"
-# Assets :
-# constants / asset keys
-BTN_ONE_IMAGES = ["buttons/interactive_buttons1.1.png", "buttons/interactive_buttons1.2.png"]
-BTN_TWO_IMAGES = ["buttons/interactive_buttons2.1.png", "buttons/interactive_buttons2.2.png"]
-BTN_THREE_IMAGES = ["buttons/interactive_buttons3.1.png", "buttons/interactive_buttons3.2.png"]
-BTN_FOUR_IMAGES = ["buttons/interactive_buttons4.1.png", "buttons/interactive_buttons4.2.png"]
+
 # Scenes :
 class GameScene(scene.Scene) :
 ### ↓ GAME LOGIC HERE ↓ ###
@@ -40,9 +36,6 @@ class GameScene(scene.Scene) :
         super().__init__()
         self.spawn_timer = 0
         self.spawn_interval = self.random_interval()
-
-        self.buttons = []
-        self.reticles = []
 
     def load(self) :
         background = ZoomingBackground(image=self.assets.get("background.png"), 
@@ -57,8 +50,8 @@ class GameScene(scene.Scene) :
 
 
         # Reticles :
-        self.reticle_x = Reticles(image=self.assets.get(ret_path + "reticule_x.png"),position=(250,250),layer=RETICLES_LAYER)
-        self.reticle_y = Reticles(image=self.assets.get(ret_path + "reticule_y.png"),position=(950,250),layer=RETICLES_LAYER)
+        self.reticle_x = Reticles(image=self.assets.get("reticles/reticule_x.png"),position=(250,250),layer=RETICLES_LAYER)
+        self.reticle_y = Reticles(image=self.assets.get("reticles/reticule_y.png"),position=(950,250),layer=RETICLES_LAYER)
 
         self.reticles = {
         "reticle_x": self.reticle_x,
@@ -81,7 +74,6 @@ class GameScene(scene.Scene) :
         self.set_random_buttons_active()
 
         ### !! RED BUTTON = SPECIAL GARBAGE LOGIC  --damn ok, no need to scream--
-        # red_button = RedButton(image=self.assets.get("buttons/red_button.png"), position=(600, 520), layer=COCKPIT_LAYER) 
 
         self.current_garbage = self.spawn_garbage()
     
@@ -92,7 +84,19 @@ class GameScene(scene.Scene) :
         if self.reticle_x.is_near(target=self.reticle_y, threshold=RETICLE_SNAPPING_THRESHOLD) and not self.reticle_x.linked :
             self.reticle_x.snap_to(self.reticle_y)
 
+            viewfinder = Reticles(image=self.assets.get(ret_path + "reticule_x.png"),
+                                  position = self.reticle_x.current_pos,
+                                  layer=RETICLES_LAYER)
 
+            for button in self.buttons :
+                if button.is_active :
+                    button.set_reticle(viewfinder)
+
+            self.reticle_x.destroy()
+            self.reticle_y.destroy()
+
+            self.red_button.set_active()
+            
         # Respawning garbage logic :
         self.spawn_timer += dt
         if self.spawn_timer >= self.spawn_interval :
@@ -174,6 +178,13 @@ class Button(go.AnimatedObject, go.ClickableObject):
         # print(f"images: {len(self.images)}, animating: {self.is_animating}")
         self.is_animating = True
         self.frame = 0
+
+    def update(self, dt):
+        super().update(dt)
+        if self.is_clicked:
+            self.image = self.images[-1] # Image stays on click
+        else:
+            self.image = self.images[0] # Resets to idle on release
         
 
 class ReticlesButton(Button) :
@@ -181,7 +192,6 @@ class ReticlesButton(Button) :
         super().__init__(images, position, layer, frame_duration)
         self.reticle = None
         self.direction = None
-        
 
     def update_reticle(self):
         if self.is_clicked:
@@ -206,11 +216,6 @@ class ReticlesButton(Button) :
 
     def update(self, dt):
         super().update(dt)
-        if self.is_clicked:
-            self.image = self.images[-1] # Image stays on click
-        else:
-            self.image = self.images[0] # Resets to idle on release
-
         if self.reticle :
             self.update_reticle()
 
@@ -219,9 +224,15 @@ class RedButton(Button) :
     def __init__(self, images, position, layer, frame_duration = 0.1):
         super().__init__(images, position, layer, frame_duration)
         self.is_active = False
+        self.idle = images[0]
+        self.images = [images[i] for i in range(1, len(images))] # Remove idle
     
     def update(self, dt):
-        super().update(dt)
+        if self.is_active :
+            super().update(dt)
+
+    def animate(self, dt):
+        return super().animate(dt)
         
     def destroy_garbage(self, garbage):
         if self.is_active and garbage:
