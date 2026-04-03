@@ -223,13 +223,10 @@ class RedButton(Button) :
     def update(self, dt):
         super().update(dt)
         
+    def destroy_garbage(self, garbage):
+        if self.is_active and garbage:
+            garbage.destroy()
 
-    def destroy_garbage(self):
-        if self.is_active:
-            self.destroy(Garbage)
-
-        
-    pass
 
 class Reticles(go.SnappingObject):
     def __init__(self, image, position, layer):
