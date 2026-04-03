@@ -5,7 +5,6 @@ import pygame as pg
 import scene_management as scene
 import game_objects as go
 import configs as configs
-
 # Display :
 SCREEN_WIDTH = 1200
 SCREEN_HEIGHT = 600
@@ -37,6 +36,8 @@ class GameScene(scene.Scene) :
         self.spawn_interval = self.random_interval()
         self.garbage_on_screen = []
         self.reticles_snapped = False
+        self.first_garbage = True
+        self.first_garbage_timer = 15.0
 
         background = ZoomingBackground(image=self.assets.get("background.png"), 
                                        position=SCREEN_CENTER, 
@@ -75,7 +76,7 @@ class GameScene(scene.Scene) :
 
         ### !! RED BUTTON = SPECIAL GARBAGE LOGIC  --damn ok, no need to scream--
 
-        self.current_garbage = self.spawn_garbage()
+
     
     def update(self, dt):
         super().update(dt)
@@ -105,11 +106,17 @@ class GameScene(scene.Scene) :
                     garbage.destroy()
                     
         # Respawning garbage logic :
+        
         self.spawn_timer += dt
-        if self.spawn_timer >= self.spawn_interval :
+        if self.spawn_timer >= self.spawn_interval and not self.first_garbage:
             self.spawn_timer = 0
             self.spawn_interval = self.random_interval()
             self.spawn_garbage()    
+        if self.first_garbage :
+            print("waiting")
+            self.first_garbage_timer -= dt
+            if self.first_garbage_timer <= 0:
+                self.first_garbage = False
 
 
     # Garbage 
