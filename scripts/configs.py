@@ -114,3 +114,26 @@ RED_BUTTON_CONFIG = {
         "reticle": "reticle_x",
         "direction": UP
     }
+
+# POST ITS :
+POST_IT_LEFT_CONFIGS = [
+    # LEFT
+    {
+        "image": "post_its/post_it_with_clear_instructions.png",
+        "position": (50,200)
+    },
+    {
+        "image": "post_its/post_it_shmile.png",
+        "position" : (100,300)
+    }
+]
+POST_IT_RIGHT_CONFIGS = [
+    {
+        "image": "post_its/post_it_OXO.png",
+        "position" : (1100,250)
+    },
+    {
+        "image": "post_its/post_it_family.png",
+        "position" : (1150,115)
+    },
+]

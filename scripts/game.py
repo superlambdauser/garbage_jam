@@ -25,9 +25,6 @@ RETICLE_SNAPPING_THRESHOLD = 20.0
 RETICLE_BOUNDS_X = (160,1050)
 RETICLE_BOUNDS_Y = (125,370)
 
-###TEST :
-ret_path = "reticles/"
-
 # Scenes :
 class GameScene(scene.Scene) :
 ### ↓ GAME LOGIC HERE ↓ ###
@@ -39,16 +36,38 @@ class GameScene(scene.Scene) :
         self.first_garbage = True
         self.first_garbage_timer = 15.0
 
-        background = ZoomingBackground(image=self.assets.get("background.png"), 
-                                       position=SCREEN_CENTER, 
-                                       layer=BACKGROUND_LAYER)
-        cockpit = go.GameObject(image=self.assets.get("cockpit.png"),
-                                position=SCREEN_CENTER, 
-                                layer=COCKPIT_LAYER)
-        portrait = HangingPortrait(image=self.assets.get("family_portrait_hanging.png"),
-                                  position=(1000, 80),
-                                  layer=COCKPIT_LAYER )
+        background = ZoomingBackground(
+            image=self.assets.get("background.png"),
+            position=SCREEN_CENTER, 
+            layer=BACKGROUND_LAYER)
+        
+        cockpit = go.GameObject(
+            image=self.assets.get("cockpit.png"),
+            position=SCREEN_CENTER,  
+            layer=COCKPIT_LAYER)
+        
+        portrait = HangingPortrait(
+            image=self.assets.get("family_portrait_hanging.png"),
+            position=(1000, 80),
+            layer=COCKPIT_LAYER )
 
+        post_its_left = [
+            go.GameObject(
+                image=self.assets.get(cfg["image"]),
+                position=cfg["position"],
+                layer=COCKPIT_LAYER
+            )
+            for cfg in configs.POST_IT_LEFT_CONFIGS
+        ]
+
+        post_its_right = [
+            go.GameObject(
+                image=self.assets.get(cfg["image"]),
+                position=cfg["position"],
+                layer=COCKPIT_LAYER
+            )
+            for cfg in configs.POST_IT_RIGHT_CONFIGS
+        ]
 
         # Reticles :
         self.reticle_x = Reticles(image=self.assets.get("reticles/reticule_x.png"),position=(250,250),layer=RETICLES_LAYER)
@@ -117,7 +136,6 @@ class GameScene(scene.Scene) :
             self.first_garbage_timer -= dt
             if self.first_garbage_timer <= 0:
                 self.first_garbage = False
-
 
     # Garbage 
     def random_interval(self) :
@@ -204,7 +222,6 @@ class Button(go.AnimatedObject, go.ClickableObject):
         else:
             self.image = self.images[0] # Resets to idle on release
         
-
 class ReticlesButton(Button) :
     def __init__(self, images, position, layer, frame_duration:float=0.1):
         super().__init__(images, position, layer, frame_duration)
