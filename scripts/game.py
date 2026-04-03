@@ -58,7 +58,7 @@ class GameScene(scene.Scene) :
         
         # Buttons :
         self.buttons = [
-        InteractiveButton(images=[self.assets.get(img) for img in cfg["images"]],
+        ReticlesButton(images=[self.assets.get(img) for img in cfg["images"]],
             position=cfg["position"],
             layer=BUTTONS_LAYER
             ) 
@@ -68,7 +68,7 @@ class GameScene(scene.Scene) :
         self.set_random_buttons_active()
 
         ### !! RED BUTTON = SPECIAL GARBAGE LOGIC  --damn ok, no need to scream--
-        # red_button = Button(image=self.assets.get("buttons/red_button.png"), position=(600, 520), layer=COCKPIT_LAYER) 
+        # red_button = RedButton(image=self.assets.get("buttons/red_button.png"), position=(600, 520), layer=COCKPIT_LAYER) 
 
         self.current_garbage = self.spawn_garbage()
     
@@ -78,6 +78,7 @@ class GameScene(scene.Scene) :
         # Snapping reticles :
         if self.reticle_x.is_near(target=self.reticle_y, threshold=RETICLE_SNAPPING_THRESHOLD) and not self.reticle_x.linked :
             self.reticle_x.snap_to(self.reticle_y)
+
 
         # Respawning garbage logic :
         self.spawn_timer += dt
@@ -115,7 +116,7 @@ class GameScene(scene.Scene) :
                 button = random.choice(self.buttons)
                 while button.is_active :
                     button = random.choice(self.buttons)
-                button.set_active(reticle=reticle, direction=dir)
+                button.set_controls(reticle=reticle, direction=dir)
     
     def reset_buttons(self) :
         self.set_all_buttons_to_decoys()
@@ -146,17 +147,28 @@ class Garbage(go.ZoomingRotatingObject):
             self.destroy()
 
 class Button(go.AnimatedObject, go.ClickableObject):
+    def __init__(self, images, position, layer, frame_duration = 0.1):
+        super().__init__(images, position, layer, frame_duration)
+        self.is_active = False
+
+    def set_active(self):
+        self.is_active = True
+
+    def set_inactive(self):
+        self.is_active = False
+
     def on_click(self) :
         # print(f"images: {len(self.images)}, animating: {self.is_animating}")
         self.is_animating = True
         self.frame = 0
         
-class InteractiveButton(Button) :
+
+class ReticlesButton(Button) :
     def __init__(self, images, position, layer, frame_duration:float=0.1):
         super().__init__(images, position, layer, frame_duration)
         self.reticle = None
         self.direction = None
-        self.is_active = False
+        
 
     def update_reticle(self):
         if self.is_clicked:
@@ -165,13 +177,11 @@ class InteractiveButton(Button) :
 
     def set_to_decoy(self) :
         self.reticle = None
-        self.is_active = False
-        # self.reticle.must_move = False
-        # self.reticle.direction = [1, 1]
+        self.set_inactive()
         self.direction = None
 
-    def set_active(self, reticle, direction) :
-        self.is_active = True
+    def set_controls(self, reticle, direction) :
+        self.set_active()
         self.set_reticle(reticle)
         self.set_direction(direction)
     
@@ -193,6 +203,19 @@ class InteractiveButton(Button) :
 
 class RedButton(Button) :
     # Garbage destruction button
+    def __init__(self, images, position, layer, frame_duration = 0.1):
+        super().__init__(images, position, layer, frame_duration)
+        self.is_active = False
+    
+    def update(self, dt):
+        super().update(dt)
+        
+
+    def destroy_garbage(self):
+        if self.is_active:
+            self.destroy(Garbage)
+
+        
     pass
 
 class Reticles(go.SnappingObject):
@@ -206,6 +229,8 @@ class Reticles(go.SnappingObject):
         self.bounds_y = RETICLE_BOUNDS_Y
 
         self.linked = None
+        self.is_snapped = False
+        
     
     def move_on_click(self, dt, direction):
         new_x = self.current_pos[0] + direction[0] * dt * RETICLE_SPEED
@@ -243,8 +268,15 @@ class Reticles(go.SnappingObject):
         self.linked = target
         target.linked = self
         self.set_position(target.rect.center)
+        self.is_snapped = True
+
+        
+        
+        
 
     def unlink(self) :
         if self.linked :
             self.linked.linked = None
             self.linked = None
+            self.is_snapped = False
+            
