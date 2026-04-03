@@ -55,6 +55,7 @@ class GameScene(scene.Scene) :
                                   position=(1000, 80),
                                   layer=COCKPIT_LAYER )
 
+
         # Reticles :
         self.reticle_x = Reticles(image=self.assets.get(ret_path + "reticule_x.png"),position=(250,250),layer=RETICLES_LAYER)
         self.reticle_y = Reticles(image=self.assets.get(ret_path + "reticule_y.png"),position=(950,250),layer=RETICLES_LAYER)
@@ -242,7 +243,6 @@ class Reticles(go.SnappingObject):
 
         self.linked = None
         self.is_snapped = False
-        
     
     def move_on_click(self, dt, direction):
         new_x = self.current_pos[0] + direction[0] * dt * RETICLE_SPEED
@@ -282,13 +282,31 @@ class Reticles(go.SnappingObject):
         self.set_position(target.rect.center)
         self.is_snapped = True
 
-        
-        
-        
-
     def unlink(self) :
         if self.linked :
             self.linked.linked = None
             self.linked = None
             self.is_snapped = False
-            
+    
+
+class HangingPortrait(go.RotatingObject) :
+    def __init__(self, amplitude:float=5, rotation_speed=2, **kwargs):
+        super().__init__(rotation_speed, **kwargs)
+        self.amplitude = amplitude # degrees
+        self.wiggle_speed = rotation_speed #radians per second
+        self.timer = 0.0
+        self.pin = self.original.get_rect(topleft=self.rect.topleft).midtop
+
+    def update(self, dt):
+        self.timer += dt
+        self.angle = self.amplitude * math.sin(self.timer * self.wiggle_speed)
+        
+        # Rotate the image
+        self.image = pg.transform.rotate(self.original, self.angle)
+        
+        # Calculate offset caused by rotation
+        offset = pg.math.Vector2(0, self.original.get_height() / 2)  # distance from pin to center
+        offset.rotate_ip(-self.angle)  # rotate the offset by the same angle
+        
+        # Place rect so the pin stays fixed
+        self.rect = self.image.get_rect(center=self.pin + offset)
