@@ -32,12 +32,12 @@ ret_path = "reticles/"
 # Scenes :
 class GameScene(scene.Scene) :
 ### ↓ GAME LOGIC HERE ↓ ###
-    def __init__(self):
-        super().__init__()
+    def load(self) :
         self.spawn_timer = 0
         self.spawn_interval = self.random_interval()
+        self.garbage_on_screen = []
+        self.reticles_snapped = False
 
-    def load(self) :
         background = ZoomingBackground(image=self.assets.get("background.png"), 
                                        position=SCREEN_CENTER, 
                                        layer=BACKGROUND_LAYER)
@@ -81,22 +81,29 @@ class GameScene(scene.Scene) :
         super().update(dt)
 
         # Snapping reticles :
-        if self.reticle_x.is_near(target=self.reticle_y, threshold=RETICLE_SNAPPING_THRESHOLD) and not self.reticle_x.linked :
+        if self.reticle_x.is_near(target=self.reticle_y, threshold=RETICLE_SNAPPING_THRESHOLD) and not self.reticles_snapped :
             self.reticle_x.snap_to(self.reticle_y)
+            self.reticles_snapped = True
 
-            viewfinder = Reticles(image=self.assets.get(ret_path + "reticule_x.png"),
+            self.viewfinder = Reticles(image=self.assets.get("reticles/viewfinder.png"),
                                   position = self.reticle_x.current_pos,
                                   layer=RETICLES_LAYER)
 
             for button in self.buttons :
                 if button.is_active :
-                    button.set_reticle(viewfinder)
+                    button.set_reticle(self.viewfinder)
 
             self.reticle_x.destroy()
             self.reticle_y.destroy()
 
             self.red_button.set_active()
-            
+        
+        #if garbage destroy : reset_buttons (later), reset reticles pos + unlink them
+        if self.reticles_snapped :
+            for garbage in self.garbage_on_screen :
+                if garbage.rect.collidepoint(self.viewfinder.current_pos) and self.red_button.is_clicked : 
+                    garbage.destroy()
+                    
         # Respawning garbage logic :
         self.spawn_timer += dt
         if self.spawn_timer >= self.spawn_interval :
@@ -104,7 +111,6 @@ class GameScene(scene.Scene) :
             self.spawn_interval = self.random_interval()
             self.spawn_garbage()    
 
-        #if garbage destroy : reset_buttons (later), reset reticles pos + unlink them
 
     # Garbage 
     def random_interval(self) :
@@ -116,11 +122,16 @@ class GameScene(scene.Scene) :
         return (x, y)
     
     def spawn_garbage(self) :
+        # Access images :
         garbage_folder = self.assets._base_path + "garbage/"
         random_file = random.choice(os.listdir(garbage_folder))
         
+        # Actually spawn garbage :
         garbage = Garbage(image=self.assets.get("garbage/" + random_file), position=self.random_position(), layer=GARBAGE_LAYER, scaling_speed=0.1, max_scale=2.5)
         garbage.set_speed(garbage.rotation_speed * random.uniform(-1, 1))
+
+        # Store garbage spawned in a list :
+        self.garbage_on_screen.append(garbage)
 
     # Buttons 
     def set_all_buttons_to_decoys(self) :
@@ -231,9 +242,6 @@ class RedButton(Button) :
         if self.is_active :
             super().update(dt)
 
-    def animate(self, dt):
-        return super().animate(dt)
-        
     def destroy_garbage(self, garbage):
         if self.is_active and garbage:
             garbage.destroy()
@@ -285,16 +293,8 @@ class Reticles(go.SnappingObject):
 
     def snap_to(self, target):
         # Linking both so controls are shared between reticles :
-        self.linked = target
-        target.linked = self
         self.set_position(target.rect.center)
         self.is_snapped = True
-
-    def unlink(self) :
-        if self.linked :
-            self.linked.linked = None
-            self.linked = None
-            self.is_snapped = False
     
 
 class HangingPortrait(go.RotatingObject) :
