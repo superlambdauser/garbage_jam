@@ -37,7 +37,6 @@ RETICLE_BOUNDS_Y = (125,370)
 
 # Scenes :
 class GameScene(scenes.Scene) :
-### ↓ GAME LOGIC HERE ↓ ###
     def load(self) :
         self.score = 0
 
@@ -134,10 +133,7 @@ class GameScene(scenes.Scene) :
         EventBus.on("game_over", self.on_game_over)
     
     def _unregister_event(self, event, callback):
-        EventBus.off(event, callback)
-
-    def _unregister_all_events(self):
-        # Clen up all events registered in the event bus
+        print("unregistering events")
         EventBus.off_all(self)
 
     def update(self, dt):
@@ -218,6 +214,7 @@ class GameScene(scenes.Scene) :
         self.reticle_x.snap_to(self.reticle_y)
 
     def on_reticles_snapped(self) :
+        print(f"snapped called, reticles_snapped: {self.reticles_snapped}")
         self.viewfinder = Reticles(
                 image=self.assets.get("reticles/viewfinder.png"),
                 position = self.reticle_x.current_pos,
@@ -305,10 +302,17 @@ class GameOverScene(scenes.Scene) :
             layer=START_BG_LAYER)
         
         self.game_over_txt = TextObject(
-            position=SCREEN_CENTER,
+            position=(600,250),
             layer=START_IMAGE_LAYER,
             font_size= 100,
             text="GAME OVER"
+        )
+
+        self.score_display = TextObject(
+            position=(600, 350),
+            layer=START_IMAGE_LAYER,
+            font_size=50,
+            text=f"You collected {self.final_score} garbage. BEST : {self.best_score}"
         )
 
         self.restart_button = RestartButton(
@@ -359,7 +363,7 @@ class Garbage(go.ZoomingRotatingObject):
 class Cockpit(go.GameObject):
     def __init__(self, image, position, layer):
         super().__init__(image, position, layer)
-        self.cockpit_max_pv = 2
+        self.cockpit_max_pv = 3
         self.cockpit_actual_pv = self.cockpit_max_pv
 
     def take_damage(self,damage):

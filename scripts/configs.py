@@ -132,7 +132,7 @@ RESTART_BTN_IMAGES = ["buttons/restart_button.png",
 
 RESTART_BTN_CONFIG = {
     "images":RESTART_BTN_IMAGES,
-    "position":(600,400),
+    "position":(600,450),
     
 }
 

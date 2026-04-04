@@ -22,3 +22,7 @@ class EventBus:
     def emit(cls, event, **kwargs):
         for callback in cls._listeners.get(event, []):
             callback(**kwargs)
+
+    @classmethod
+    def clear(cls):
+        cls._listeners = {}
