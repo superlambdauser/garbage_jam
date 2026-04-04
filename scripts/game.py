@@ -76,6 +76,13 @@ class GameScene(scenes.Scene) :
             font_size=50,
             color=(13, 69, 30),
             text="0")
+        
+        self.hp_display = TextObject(
+            position=(1000, 425),
+            layer=COCKPIT_LAYER,
+            font_size=50,
+            color=(150,0,75),
+            text=f"{self.cockpit.cockpit_actual_pv}")
 
         self.portrait = HangingPortrait(
             image=self.assets.get("family_portrait_hanging.png"),
@@ -249,7 +256,7 @@ class GameScene(scenes.Scene) :
 
 class StartScene(scenes.Scene):
     def load(self):
-        self.button_timer = 5
+        self.button_timer = 3
         
         self.start_background = ZoomingBackground(
             image=self.assets.get("background1.png"),
@@ -363,7 +370,7 @@ class Garbage(go.ZoomingRotatingObject):
 class Cockpit(go.GameObject):
     def __init__(self, image, position, layer):
         super().__init__(image, position, layer)
-        self.cockpit_max_pv = 3
+        self.cockpit_max_pv = 10
         self.cockpit_actual_pv = self.cockpit_max_pv
 
     def take_damage(self,damage):
