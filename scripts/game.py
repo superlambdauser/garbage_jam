@@ -295,11 +295,25 @@ class GameOverScene(scenes.Scene) :
             layer=START_BG_LAYER)
         
         self.game_over_txt = TextObject(
-            position=(600,300),
+            position=SCREEN_CENTER,
             layer=START_IMAGE_LAYER,
             font_size= 100,
             text="GAME OVER"
         )
+
+        self.restart_button = RestartButton(
+            images=[self.assets.get(img) for img in configs.RESTART_BTN_CONFIG["images"]],
+            position=configs.RESTART_BTN_CONFIG["position"],
+            layer=START_BUTTON_LAYER
+        )
+
+        self._register_events() 
+
+    def _register_events(self):
+        EventBus.on("restart_clicked", self.on_restart_clicked)
+
+    def on_restart_clicked(self) :
+        scenes.SceneManager().switch(StartScene())
     
 # Game Objects :
 class ZoomingBackground(go.ZoomingObject) :
@@ -335,7 +349,7 @@ class Garbage(go.ZoomingRotatingObject):
 class Cockpit(go.GameObject):
     def __init__(self, image, position, layer):
         super().__init__(image, position, layer)
-        self.cockpit_max_pv = 20
+        self.cockpit_max_pv = 2
         self.cockpit_actual_pv = self.cockpit_max_pv
 
     def take_damage(self,damage):
@@ -371,6 +385,12 @@ class Button(go.AnimatedObject, go.ClickableObject, go.OutlineHoverEffectObjects
             self.image = self.images[-1] # Image stays on click
         else:
             self.image = self.images[0] # Resets to idle on release
+
+class RestartButton(Button) :
+    def on_click(self):
+        super().on_click()
+        EventBus.emit("restart_clicked")
+
 class ReticlesButton(Button) :
     def __init__(self, images, position, layer, frame_duration:float=0.1):
         super().__init__(images, position, layer, frame_duration)

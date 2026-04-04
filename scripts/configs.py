@@ -126,6 +126,16 @@ START_BTN_CONFIG = {
     
 }
 
+# RESTART BUTTON 
+RESTART_BTN_IMAGES = ["buttons/restart_button.png",
+                      "buttons/restart_button2.png"]
+
+RESTART_BTN_CONFIG = {
+    "images":RESTART_BTN_IMAGES,
+    "position":(600,400),
+    
+}
+
 # POST ITS :
 POST_IT_LEFT_CONFIGS = [
     # LEFT
