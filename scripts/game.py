@@ -40,7 +40,12 @@ class GameScene(scene.Scene) :
         
         self.garbage_on_screen = []
         self.cracks = []
-        
+
+        #music :
+        pg.mixer.init()
+        pg.mixer.music.load("assets/sound/ambient_horror.wav")
+        pg.mixer.music.set_volume(0.5)
+        pg.mixer.music.play()
         # Events :
         self._register_events()
 
