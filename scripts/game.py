@@ -76,6 +76,21 @@ class GameScene(scenes.Scene) :
             font_size=50,
             color=(13, 69, 30),
             text="0")
+        
+        self.hp_display = TextObject(
+            position=(1030, 425),
+            layer=COCKPIT_LAYER,
+            font_size=50,
+            color=(150,0,75),
+            text=f"{self.cockpit.cockpit_actual_pv}")
+
+        
+        self.hp_display = TextObject(
+            position=(1030, 425),
+            layer=COCKPIT_LAYER,
+            font_size=50,
+            color=(150,0,75),
+            text=f"{self.cockpit.cockpit_actual_pv}")
 
         self.portrait = HangingPortrait(
             image=self.assets.get("family_portrait_hanging.png"),
@@ -199,6 +214,16 @@ class GameScene(scenes.Scene) :
         crack = go.GameObject(image=self.assets.get("cracks/" + random_file_crack), position=position, layer=RETICLES_LAYER)
         self.cracks.append(crack)
 
+        #crack sounds :
+        sound_path = self.assets._base_path + "sound/cracks"
+        cracks_mp3 = [os.path.join(sound_path, f) for f in os.listdir(sound_path) if f.endswith('.mp3')]
+        random_crack_sound = random.choice(cracks_mp3)
+
+        pg.mixer.music.load(random_crack_sound)
+        pg.mixer.music.play()
+
+
+
     def on_garbage_collision(self, damage, position) :
         print("OUCH")
         self.cockpit.take_damage(damage)
@@ -249,7 +274,8 @@ class GameScene(scenes.Scene) :
 
 class StartScene(scenes.Scene):
     def load(self):
-        self.button_timer = 5
+        pg.mixer.music.stop()
+        self.button_timer = 2.0
         
         self.start_background = ZoomingBackground(
             image=self.assets.get("background1.png"),
@@ -291,6 +317,8 @@ class StartScene(scenes.Scene):
 
 class GameOverScene(scenes.Scene) :
     def __init__(self, score):
+        pg.mixer.music.stop()
+
         self.final_score = score
         self.best_score = scores.best_score
 
@@ -363,7 +391,8 @@ class Garbage(go.ZoomingRotatingObject):
 class Cockpit(go.GameObject):
     def __init__(self, image, position, layer):
         super().__init__(image, position, layer)
-        self.cockpit_max_pv = 3
+        self.cockpit_max_pv = 10
+        self.cockpit_max_pv = 10
         self.cockpit_actual_pv = self.cockpit_max_pv
 
     def take_damage(self,damage):
