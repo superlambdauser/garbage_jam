@@ -103,6 +103,7 @@ class GameScene(scene.Scene) :
         # Here goes events like so :
         # EventBus.on(event_name:str, callback:custom_method)
         EventBus.on("garbage_escaped", self.on_garbage_collision)
+        EventBus.on("reticles_snap",self.on_reticles_near)
     
     def _unregister_event(self, event, callback):
         EventBus.off(event, callback)
@@ -117,7 +118,7 @@ class GameScene(scene.Scene) :
 
         # Snapping reticles :
         if self.reticle_x.is_near(target=self.reticle_y, threshold=RETICLE_SNAPPING_THRESHOLD) and not self.reticles_snapped :
-            self.reticle_x.snap_to(self.reticle_y)
+            EventBus.emit("reticles_snap")
             self.reticles_snapped = True
 
             self.viewfinder = Reticles(image=self.assets.get("reticles/viewfinder.png"),
@@ -175,10 +176,14 @@ class GameScene(scene.Scene) :
         # Store garbage spawned in a list :
         self.garbage_on_screen.append(garbage)
 
+
     def on_garbage_collision(self, damage) :
         print("OUCH")
         self.cockpit.take_damage(damage)
-        pass
+        
+    def on_reticles_near(self):
+        self.reticle_x.snap_to(self.reticle_y)
+
 
     # Buttons 
     def set_all_buttons_to_decoys(self) :
