@@ -280,7 +280,7 @@ class StartScene(scenes.Scene):
             font_size=32,
             color= (150,0,75),
             text="You remember, right? What all of this is for ?\n"
-            "What you have done ?"
+            "       What you have done ?"
         )
     
     def update(self, dt):
