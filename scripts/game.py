@@ -7,18 +7,24 @@ import configs as configs
 from event_bus import EventBus
 import scene_management as scene
 
+
 # Display :
 SCREEN_WIDTH = 1200
 SCREEN_HEIGHT = 600
 SCREEN_SIZE = (SCREEN_WIDTH, SCREEN_HEIGHT)
 SCREEN_CENTER = (SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2)
 
-#Layers :
+#Game Layers :
 BACKGROUND_LAYER = 0
 GARBAGE_LAYER = 1
 RETICLES_LAYER = 2
 COCKPIT_LAYER = 3
 BUTTONS_LAYER = 4
+
+#Start layers:
+START_BG_LAYER = 0
+START_IMAGE_LAYER = 1
+START_BUTTON_LAYER = 2
 
 # Reticles directions/speed :
 RETICLE_SPEED = 200.0 # Pixels per millisecond
@@ -216,6 +222,42 @@ class GameScene(scene.Scene) :
     def reset_buttons(self) :
         self.set_all_buttons_to_decoys()
         self.set_random_buttons_active()
+
+class StartScene(scene.Scene):
+    def load(self):
+        self.button_timer = 5
+        
+        self.start_background = ZoomingBackground(
+            image=self.assets.get("background1.png"),
+            position=SCREEN_CENTER,
+            layer=START_BG_LAYER)
+        
+        self.post_it = go.GameObject(
+            image=self.assets.get("post_its/post_it_remember.png"),
+            position=(820,480),
+            layer=START_IMAGE_LAYER)
+        
+        self.family_portait = go.GameObject(
+            image=self.assets.get("family_drawing.png"),
+            position=SCREEN_CENTER,
+            layer=START_IMAGE_LAYER)
+        
+        self.start_button = Button(images=[self.assets.get(img) for img in configs.START_BTN_CONFIG["images"]],
+                                   position=configs.START_BTN_CONFIG["position"],
+                                   layer=START_BUTTON_LAYER)
+        self.start_button.is_active = False
+        
+
+    
+    def update(self, dt):
+        super().update(dt)
+        self.button_timer -= dt
+        if self.button_timer <=0:
+            self.start_button.is_active = True
+        
+        if self.start_button.is_active and self.start_button.is_clicked:
+            scene.SceneManager().switch(GameScene())
+            
 
 class MenuScene(scene.Scene) :
     def load(self) :

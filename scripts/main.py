@@ -23,7 +23,7 @@ running = True
 
 scenes = scene.SceneManager()
 
-scenes.switch(game.GameScene()) # MenuScene later 
+scenes.switch(game.StartScene()) # MenuScene later 
 
 while running:
     dt = clock.tick(60) / 1000

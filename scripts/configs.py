@@ -115,6 +115,17 @@ RED_BUTTON_CONFIG = {
         "direction": UP
     }
 
+# START BUTTON 
+START_BTN_IMAGES = ["buttons/red_button_off.png",
+                  "buttons/red_button_on.png",
+                  "buttons/red_button_pressed.png"]
+
+START_BTN_CONFIG = {
+    "images":START_BTN_IMAGES,
+    "position":(590,550),
+    
+}
+
 # POST ITS :
 POST_IT_LEFT_CONFIGS = [
     # LEFT
