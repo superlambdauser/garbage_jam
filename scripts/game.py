@@ -154,7 +154,7 @@ class GameScene(scenes.Scene) :
         if self.reticles_snapped :
             for garbage in self.garbage_on_screen :
                 if pg.sprite.collide_mask(garbage, self.viewfinder) and self.red_button.is_clicked : 
-                    EventBus.emit("garbage_destroyed", garbage=self)
+                    EventBus.emit("garbage_destroyed", garbage=garbage)
                     garbage.destroy()
                     
         # Respawning garbage logic :
@@ -331,16 +331,21 @@ class Garbage(go.ZoomingRotatingObject):
     def update(self, dt):
         super().update(dt)
         if self.scale > self.max_scale:
-            EventBus.emit("garbage_escaped", damage=self.damage, position=self.position)
-            self.destroy()
+            self.escape()
+
+    def escape(self) :
+        if not self.alive():
+            return
+        EventBus.emit("garbage_escaped", damage=self.damage, position=self.position)
+        super().destroy()
     
     def destroy(self):
-        return super().destroy()
+        super().destroy()
 
 class Cockpit(go.GameObject):
     def __init__(self, image, position, layer):
         super().__init__(image, position, layer)
-        self.cockpit_max_pv = 2
+        self.cockpit_max_pv = 20
         self.cockpit_actual_pv = self.cockpit_max_pv
 
     def take_damage(self,damage):
