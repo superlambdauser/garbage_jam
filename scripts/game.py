@@ -57,7 +57,7 @@ class GameScene(scenes.Scene) :
 
         #music :
         pg.mixer.init()
-        pg.mixer.music.load("assets/sound/ambient_horror.wav")
+        pg.mixer.music.load("assets/sound/ambient_horror.ogg")
         pg.mixer.music.set_volume(0.3)
         pg.mixer.music.play()
 
