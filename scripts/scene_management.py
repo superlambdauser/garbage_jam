@@ -1,6 +1,7 @@
 import os
 import pygame as pg
 import game_objects as go
+from event_bus import EventBus
 
 # Assets Manager :
 class AssetsManager:
@@ -35,11 +36,13 @@ class SceneManager :
         return cls._instance
     
     def __init__(self):
-        self.current = None
+        if not hasattr(self, 'current'):  # ← here
+            self.current = None
     
     def switch(self, new_scene) :
         if self.current:
-            self.current.unload()  # cleanup listeners
+            self.current.unload() 
+        EventBus.clear() # cleanup listeners
         self.current = new_scene
         self.current.load()
 
