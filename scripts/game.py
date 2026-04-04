@@ -2,10 +2,12 @@ import os
 import math
 import random
 import pygame as pg
+
+import scores
 import game_objects as go
 import configs as configs
+import scene_management as scenes
 from event_bus import EventBus
-import scene_management as scene
 
 # Display :
 SCREEN_WIDTH = 1200
@@ -28,9 +30,11 @@ RETICLE_BOUNDS_X = (160,1050)
 RETICLE_BOUNDS_Y = (125,370)
 
 # Scenes :
-class GameScene(scene.Scene) :
+class GameScene(scenes.Scene) :
 ### ↓ GAME LOGIC HERE ↓ ###
     def load(self) :
+        self.score = 0
+
         self.spawn_timer = 0
         self.spawn_interval = self.random_interval()
         self.first_garbage_timer = 1.0
@@ -46,6 +50,7 @@ class GameScene(scene.Scene) :
         pg.mixer.music.load("assets/sound/ambient_horror.wav")
         pg.mixer.music.set_volume(0.5)
         pg.mixer.music.play()
+
         # Events :
         self._register_events()
 
@@ -60,6 +65,13 @@ class GameScene(scene.Scene) :
             position=SCREEN_CENTER,  
             layer=COCKPIT_LAYER)
         
+        self.score_display = TextObject(
+            position=(960, 425),
+            layer=COCKPIT_LAYER,
+            font_size=50,
+            color=(13, 69, 30),
+            text="0")
+
         self.portrait = HangingPortrait(
             image=self.assets.get("family_portrait_hanging.png"),
             position=(1000, 80),
@@ -113,6 +125,7 @@ class GameScene(scene.Scene) :
         EventBus.on("garbage_escaped", self.on_garbage_collision)
         EventBus.on("garbage_destroyed", self.on_garbage_destroyed)
         EventBus.on("reticles_snap", self.on_reticles_snapped)
+        EventBus.on("game_over", self.on_game_over)
     
     def _unregister_event(self, event, callback):
         EventBus.off(event, callback)
@@ -135,6 +148,7 @@ class GameScene(scene.Scene) :
         if self.reticles_snapped :
             for garbage in self.garbage_on_screen :
                 if pg.sprite.collide_mask(garbage, self.viewfinder) and self.red_button.is_clicked : 
+                    EventBus.emit("garbage_destroyed", garbage=self)
                     garbage.destroy()
                     
         # Respawning garbage logic :
@@ -150,6 +164,11 @@ class GameScene(scene.Scene) :
             self.first_garbage_timer -= dt
             if self.first_garbage_timer <= 0:
                 self.first_garbage = False
+    
+    def on_game_over(self, score) :
+        self.final_score = score
+        scores.update_best(score)
+        scenes.SceneManager().switch(GameOverScene(score=score))
 
     # Garbage
     def random_interval(self) :
@@ -185,6 +204,8 @@ class GameScene(scene.Scene) :
         self.spawn_cracks(position)
 
     def on_garbage_destroyed(self, garbage) :
+        self.score += 1
+        self.score_display.set_text(str(self.score))
         self.garbage_on_screen.remove(garbage)
 
     # Reticles
@@ -223,10 +244,14 @@ class GameScene(scene.Scene) :
         self.set_all_buttons_to_decoys()
         self.set_random_buttons_active()
 
-class MenuScene(scene.Scene) :
+class MenuScene(scenes.Scene) :
     def load(self) :
         pass
 
+class GameOverScene(scenes.Scene) :
+    def load(self):
+        return super().load()
+    
 # Game Objects :
 class ZoomingBackground(go.ZoomingObject) :
     def __init__(self, scaling_speed = 0.03, max_scale = 3, **kwargs):
@@ -251,9 +276,7 @@ class Garbage(go.ZoomingRotatingObject):
             self.destroy()
     
     def destroy(self):
-        EventBus.emit("garbage_destroyed", garbage=self)
         return super().destroy()
-
 
 class Cockpit(go.GameObject):
     def __init__(self, image, position, layer):
@@ -270,8 +293,7 @@ class Cockpit(go.GameObject):
         if self.cockpit_actual_pv <= 0:
             #launch game over
             print("game over")
-    
-
+            EventBus.emit("game_over")
 class Button(go.AnimatedObject, go.ClickableObject, go.OutlineHoverEffectObjects):
     def __init__(self, images, position, layer, frame_duration = 0.1):
         super().__init__(images, position, layer, frame_duration)
@@ -294,7 +316,6 @@ class Button(go.AnimatedObject, go.ClickableObject, go.OutlineHoverEffectObjects
             self.image = self.images[-1] # Image stays on click
         else:
             self.image = self.images[0] # Resets to idle on release
-        
 class ReticlesButton(Button) :
     def __init__(self, images, position, layer, frame_duration:float=0.1):
         super().__init__(images, position, layer, frame_duration)
@@ -399,7 +420,6 @@ class Reticles(go.SnappingObject):
         self.set_position(target.rect.center)
         self.is_snapped = True
     
-
 class HangingPortrait(go.RotatingObject) :
     def __init__(self, amplitude:float=5, rotation_speed=2, **kwargs):
         super().__init__(rotation_speed, **kwargs)
@@ -421,3 +441,24 @@ class HangingPortrait(go.RotatingObject) :
         
         # Place rect so the pin stays fixed
         self.rect = self.image.get_rect(center=self.pin + offset)
+
+class TextObject(go.GameObject) :
+    def __init__(self, position, layer, font_size=32, color=(255, 255, 255), text=""):
+        self.text = text
+        self.font = pg.font.Font(None, font_size)
+        self.color = color
+        self.anchor = position
+        image = self._render(self.text)
+
+        super().__init__(image, position, layer)
+
+    def _render(self, text:str) :
+        return self.font.render(text, True, self.color)
+    
+    def set_text(self, text:str) :
+        self.image = self._render(text)
+        self.rect = self.image.get_rect(midright=self.anchor)
+
+class ScoreDisplay(TextObject) :
+    def set_text(self, text):
+        super().set_text(self.set_text + text)
