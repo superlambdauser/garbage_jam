@@ -55,11 +55,25 @@ class GameScene(scenes.Scene) :
         self.garbage_on_screen = []
         self.cracks = []
 
-        #music :
+        # Sound :
+        self.crack_sounds = [
+            pg.mixer.Sound(self.assets._base_path + "sound/cracks/" + f)
+            for f in os.listdir(self.assets._base_path + "sound/cracks/")
+            if f.endswith('.ogg')
+
+        ]
+
+        self.garbage_destroy_sounds = [
+            pg.mixer.Sound(self.assets._base_path + "sound/garbage_destroy/" + f)
+            for f in os.listdir(self.assets._base_path + "sound/garbage_destroy/")
+            if f.endswith('.ogg')
+        ]
+        
         pg.mixer.init()
+        print(os.listdir("assets/sound/"))
         pg.mixer.music.load("assets/sound/ambient_horror.ogg")
         pg.mixer.music.set_volume(0.3)
-        pg.mixer.music.play()
+        pg.mixer.music.play(-1) # infinite loop
 
         # Events :
         self._register_events()
@@ -216,21 +230,14 @@ class GameScene(scenes.Scene) :
         self.garbage_on_screen.append(garbage)
 
     def spawn_cracks(self, position):
+        # Visual crack (image)
         cracks_folder = self.assets._base_path + "cracks/"
         random_file_crack = random.choice(os.listdir(cracks_folder))
-
         crack = go.GameObject(image=self.assets.get("cracks/" + random_file_crack), position=position, layer=RETICLES_LAYER)
         self.cracks.append(crack)
 
         #crack sounds :
-        sound_path = self.assets._base_path + "sound/cracks"
-        cracks_mp3 = [os.path.join(sound_path, f) for f in os.listdir(sound_path) if f.endswith('.mp3')]
-        random_crack_sound = random.choice(cracks_mp3)
-
-        pg.mixer.music.load(random_crack_sound)
-        pg.mixer.music.play()
-
-
+        random.choice(self.crack_sounds).play()
 
     def on_garbage_collision(self, damage, position) :
         print("OUCH")
@@ -239,6 +246,7 @@ class GameScene(scenes.Scene) :
         self.spawn_cracks(position)
 
     def on_garbage_destroyed(self, garbage) :
+        random.choice(self.garbage_destroy_sounds).play()
         self.score += 1
         self.score_display.set_text(str(self.score))
         self.garbage_on_screen.remove(garbage)
@@ -284,7 +292,7 @@ class GameScene(scenes.Scene) :
 class StartScene(scenes.Scene):
     def load(self):
         pg.mixer.music.stop()
-        self.button_timer = 2.0
+        self.button_timer = 1.0
         
         self.start_background = ZoomingBackground(
             image=self.assets.get("background1.png"),
