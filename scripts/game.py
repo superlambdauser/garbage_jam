@@ -38,7 +38,12 @@ class GameScene(scene.Scene) :
         self.reticles_snapped = False
         self.first_garbage = True
         self.first_garbage_timer = 1.0
-        
+
+        #music :
+        pg.mixer.init()
+        pg.mixer.music.load("assets/sound/ambient_horror.wav")
+        pg.mixer.music.set_volume(0.5)
+        pg.mixer.music.play()
         # Events :
         self._register_events()
 
@@ -115,6 +120,7 @@ class GameScene(scene.Scene) :
 
     def update(self, dt):
         super().update(dt)
+
         
 
         # Snapping reticles :
