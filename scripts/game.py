@@ -35,6 +35,11 @@ RETICLE_SNAPPING_THRESHOLD = 20.0
 RETICLE_BOUNDS_X = (160,1050)
 RETICLE_BOUNDS_Y = (125,370)
 
+# Garbage spawning rate :
+DIFFICULTY_STEP = 5  
+MIN_INTERVAL = 2.0
+INTERVAL_DECREASE = 0.1  # decrease per spawn
+
 # Scenes :
 class GameScene(scenes.Scene) :
     def load(self) :
@@ -180,7 +185,10 @@ class GameScene(scenes.Scene) :
 
     # Garbage
     def random_interval(self) :
-        return random.uniform(5.0, 7.0)
+        difficulty = self.score // DIFFICULTY_STEP # difficulty increases every 5 garbage destroyed
+        base = random.uniform(5.0, 7.0)
+        decreased = self.score * INTERVAL_DECREASE
+        return max(MIN_INTERVAL, base - difficulty * INTERVAL_DECREASE)
     
     def random_position(self) :
         x = random.randrange(100, 1000, 25)
@@ -209,6 +217,7 @@ class GameScene(scenes.Scene) :
     def on_garbage_collision(self, damage, position) :
         print("OUCH")
         self.cockpit.take_damage(damage)
+        self.hp_display.set_text(str(self.cockpit.cockpit_actual_pv))
         self.spawn_cracks(position)
 
     def on_garbage_destroyed(self, garbage) :
