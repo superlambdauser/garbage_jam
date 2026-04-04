@@ -70,7 +70,6 @@ class GameScene(scenes.Scene) :
         ]
         
         pg.mixer.init()
-        print(os.listdir("assets/sound/"))
         pg.mixer.music.load("assets/sound/ambient_horror.ogg")
         pg.mixer.music.set_volume(0.3)
         pg.mixer.music.play(-1) # infinite loop
@@ -95,14 +94,6 @@ class GameScene(scenes.Scene) :
             font_size=50,
             color=(13, 69, 30),
             text="0")
-        
-        self.hp_display = TextObject(
-            position=(1030, 425),
-            layer=COCKPIT_LAYER,
-            font_size=50,
-            color=(150,0,75),
-            text=f"{self.cockpit.cockpit_actual_pv}")
-
         
         self.hp_display = TextObject(
             position=(1030, 425),
@@ -167,7 +158,6 @@ class GameScene(scenes.Scene) :
         EventBus.on("game_over", self.on_game_over)
     
     def _unregister_event(self, event, callback):
-        print("unregistering events")
         EventBus.off_all(self)
 
     def update(self, dt):
@@ -196,7 +186,6 @@ class GameScene(scenes.Scene) :
 
             #make first garbage spawn after x amount of time
         if self.first_garbage :
-            # print("waiting")
             self.first_garbage_timer -= dt
             if self.first_garbage_timer <= 0:
                 self.first_garbage = False
@@ -240,7 +229,6 @@ class GameScene(scenes.Scene) :
         random.choice(self.crack_sounds).play()
 
     def on_garbage_collision(self, damage, position) :
-        print("OUCH")
         self.cockpit.take_damage(damage)
         self.hp_display.set_text(str(self.cockpit.cockpit_actual_pv))
         self.spawn_cracks(position)
@@ -256,7 +244,6 @@ class GameScene(scenes.Scene) :
         self.reticle_x.snap_to(self.reticle_y)
 
     def on_reticles_snapped(self) :
-        print(f"snapped called, reticles_snapped: {self.reticles_snapped}")
         self.viewfinder = Reticles(
                 image=self.assets.get("reticles/viewfinder.png"),
                 position = self.reticle_x.current_pos,
@@ -413,13 +400,11 @@ class Cockpit(go.GameObject):
 
     def take_damage(self,damage):
         self.cockpit_actual_pv -= damage
-        print(f"Remaining PV : {self.cockpit_actual_pv}")
 
     def update(self, dt):
         super().update(dt)
         if self.cockpit_actual_pv <= 0:
             #launch game over
-            print("game over")
             EventBus.emit("game_over")
 
 class Button(go.AnimatedObject, go.ClickableObject, go.OutlineHoverEffectObjects):
@@ -434,7 +419,6 @@ class Button(go.AnimatedObject, go.ClickableObject, go.OutlineHoverEffectObjects
         self.is_active = False
 
     def on_click(self) :
-        # print(f"images: {len(self.images)}, animating: {self.is_animating}")
         self.is_animating = True
         self.frame = 0
 
