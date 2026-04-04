@@ -38,10 +38,10 @@ class SceneManager :
         self.current = None
 
     def switch(self, new_scene) :
-        if self.current_scene:
-            self.current_scene.unload()  # cleanup listeners
-        self.current_scene = new_scene
-        self.current_scene.load()
+        if self.current:
+            self.current.unload()  # cleanup listeners
+        self.current = new_scene
+        self.current.load()
 
     def handle_event(self, event) :
         self.current.handle_event(event)
