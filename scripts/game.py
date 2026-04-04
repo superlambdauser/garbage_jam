@@ -36,11 +36,13 @@ class GameScene(scene.Scene) :
         self.garbage_on_screen = []
         self.reticles_snapped = False
         self.first_garbage = True
-        self.first_garbage_timer = 2.0  #2.0 for debug, keep at 15.0 normally
-
+        self.first_garbage_timer = 1.0
+        
+        # Events :
+        self._register_events()
 
         # Objects :
-        background = ZoomingBackground(
+        self.background = ZoomingBackground(
             image=self.assets.get("background.png"),
             position=SCREEN_CENTER, 
             layer=BACKGROUND_LAYER)
@@ -50,12 +52,12 @@ class GameScene(scene.Scene) :
             position=SCREEN_CENTER,  
             layer=COCKPIT_LAYER)
         
-        portrait = HangingPortrait(
+        self.portrait = HangingPortrait(
             image=self.assets.get("family_portrait_hanging.png"),
             position=(1000, 80),
             layer=COCKPIT_LAYER )
 
-        post_its_left = [
+        self.post_its_left = [
             go.GameObject(
                 image=self.assets.get(cfg["image"]),
                 position=cfg["position"],
@@ -64,7 +66,7 @@ class GameScene(scene.Scene) :
             for cfg in configs.POST_IT_LEFT_CONFIGS
         ]
 
-        post_its_right = [
+        self.post_its_right = [
             go.GameObject(
                 image=self.assets.get(cfg["image"]),
                 position=cfg["position"],
@@ -96,7 +98,6 @@ class GameScene(scene.Scene) :
         
         
         self.set_random_buttons_active()
-
 
     def _register_events(self):
         # Here goes events like so :
@@ -153,13 +154,9 @@ class GameScene(scene.Scene) :
             if self.first_garbage_timer <= 0:
                 self.first_garbage = False
 
-        
-
-
-
     # Garbage 
     def random_interval(self) :
-        return random.uniform(3.0, 5.0)
+        return random.uniform(5.0, 7.0)
     
     def random_position(self) :
         x = random.randrange(100, 1000, 25)
@@ -179,9 +176,9 @@ class GameScene(scene.Scene) :
         self.garbage_on_screen.append(garbage)
 
     def on_garbage_collision(self, damage) :
-        self.cockpit.take_damage(damage)
         print("OUCH")
-        
+        self.cockpit.take_damage(damage)
+        pass
 
     # Buttons 
     def set_all_buttons_to_decoys(self) :
@@ -218,12 +215,13 @@ class ZoomingBackground(go.ZoomingObject) :
 class Garbage(go.ZoomingRotatingObject):
     def __init__(self, scaling_speed = 0.03, max_scale = 3, **kwargs):
         super().__init__(scaling_speed, max_scale, **kwargs)
+        self.damage = 10
 
 
     def update(self, dt):
         super().update(dt)
         if self.scale > self.max_scale:
-            EventBus.emit("garbage_escaped", damage =10)
+            EventBus.emit("garbage_escaped", damage=self.damage)
             # Damage ship
 
             #should be smthing like : cockpit.take_damage(damage)
@@ -240,7 +238,7 @@ class Cockpit(go.GameObject):
 
     def take_damage(self,damage):
         self.cockpit_actual_pv -= damage
-        print(self.cockpit_actual_pv)
+        print(f"Remaining PV : {self.cockpit_actual_pv}")
 
     def update(self, dt):
         super().update(dt)
@@ -248,7 +246,6 @@ class Cockpit(go.GameObject):
             #launch game over
             print("game over")
     
-
 
 class Button(go.AnimatedObject, go.ClickableObject):
     def __init__(self, images, position, layer, frame_duration = 0.1):

@@ -6,6 +6,7 @@ class EventBus:
         if event not in cls._listeners:
             cls._listeners[event] = []
         cls._listeners[event].append(callback)
+        print(f"registered: {event}, total listeners: {len(cls._listeners[event])}")
 
     @classmethod
     def off(cls, event, callback):

@@ -37,8 +37,11 @@ class SceneManager :
     def __init__(self):
         self.current = None
 
-    def switch(self, scene) :
-        self.current = scene
+    def switch(self, new_scene) :
+        if self.current:
+            self.current.unload()  # cleanup listeners
+        self.current = new_scene
+        self.current.load()
 
     def handle_event(self, event) :
         self.current.handle_event(event)
@@ -55,7 +58,6 @@ class Scene :
     def __init__(self):
         self._manager.clear_all()
         self.assets = AssetsManager()
-        self.load()
     
     def load(self) :
         raise NotImplementedError("Scenes must implement objects loading method load() !")
@@ -68,7 +70,7 @@ class Scene :
 
     def _unregister_events(self):
         pass  # override only in subclasses that need it
-    
+
     def handle_event(self, event) :
         self._manager.handle_event(event)
     
