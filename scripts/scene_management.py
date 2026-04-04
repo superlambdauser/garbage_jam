@@ -36,7 +36,7 @@ class SceneManager :
     
     def __init__(self):
         self.current = None
-
+    
     def switch(self, new_scene) :
         if self.current:
             self.current.unload()  # cleanup listeners

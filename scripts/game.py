@@ -244,10 +244,6 @@ class GameScene(scenes.Scene) :
         self.set_all_buttons_to_decoys()
         self.set_random_buttons_active()
 
-class MenuScene(scenes.Scene) :
-    def load(self) :
-        pass
-
 class GameOverScene(scenes.Scene) :
     def load(self):
         return super().load()
