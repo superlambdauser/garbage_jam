@@ -2,9 +2,11 @@ import os
 import math
 import random
 import pygame as pg
-import scene_management as scene
 import game_objects as go
 import configs as configs
+from event_bus import EventBus
+import scene_management as scene
+
 # Display :
 SCREEN_WIDTH = 1200
 SCREEN_HEIGHT = 600
@@ -34,8 +36,12 @@ class GameScene(scene.Scene) :
         self.garbage_on_screen = []
         self.reticles_snapped = False
         self.first_garbage = True
-        self.first_garbage_timer = 15.0
+        self.first_garbage_timer = 1.0
+        
+        # Events :
+        self._register_events()
 
+        # Objects :
         background = ZoomingBackground(
             image=self.assets.get("background.png"),
             position=SCREEN_CENTER, 
@@ -93,10 +99,19 @@ class GameScene(scene.Scene) :
         
         self.set_random_buttons_active()
 
-        ### !! RED BUTTON = SPECIAL GARBAGE LOGIC  --damn ok, no need to scream--
 
-
+    def _register_events(self):
+        # Here goes events like so :
+        # EventBus.on(event_name:str, callback:custom_method)
+        EventBus.on("garbage_escaped", self.on_garbage_collision)
     
+    def _unregister_event(self, event, callback):
+        EventBus.off(event, callback)
+
+    def _unregister_all_events(self):
+        # Clen up all events registered in the event bus
+        EventBus.off_all(self)
+
     def update(self, dt):
         super().update(dt)
 
@@ -132,7 +147,7 @@ class GameScene(scene.Scene) :
             self.spawn_interval = self.random_interval()
             self.spawn_garbage()    
         if self.first_garbage :
-            print("waiting")
+            # print("waiting")
             self.first_garbage_timer -= dt
             if self.first_garbage_timer <= 0:
                 self.first_garbage = False
@@ -157,6 +172,11 @@ class GameScene(scene.Scene) :
 
         # Store garbage spawned in a list :
         self.garbage_on_screen.append(garbage)
+
+    def on_garbage_collision(self) :
+        # self.cockpit.take_damage(damage)
+        print("OUCH")
+        pass
 
     # Buttons 
     def set_all_buttons_to_decoys(self) :
@@ -194,6 +214,7 @@ class Garbage(go.ZoomingRotatingObject):
     def update(self, dt):
         super().update(dt)
         if self.scale > self.max_scale:
+            EventBus.emit("garbage_escaped")
             # Damage ship
             # ...
             # Then destroy self
