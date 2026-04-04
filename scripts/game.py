@@ -26,6 +26,7 @@ BUTTONS_LAYER = 4
 START_BG_LAYER = 0
 START_IMAGE_LAYER = 1
 START_BUTTON_LAYER = 2
+START_TEXT_LAYER = 3
 
 # Reticles directions/speed :
 RETICLE_SPEED = 200.0 # Pixels per millisecond
@@ -268,10 +269,19 @@ class StartScene(scenes.Scene):
             position=SCREEN_CENTER,
             layer=START_IMAGE_LAYER)
         
-        self.start_button = Button(images=[self.assets.get(img) for img in configs.START_BTN_CONFIG["images"]],
+        self.start_button = RedButton(images=[self.assets.get(img) for img in configs.START_BTN_CONFIG["images"]],
                                    position=configs.START_BTN_CONFIG["position"],
                                    layer=START_BUTTON_LAYER)
         self.start_button.is_active = False
+
+        self.start_text = TextObject(
+            position=(SCREEN_WIDTH/2,50),
+            layer=START_TEXT_LAYER,
+            font_size=32,
+            color= (150,0,75),
+            text="You remember, right? What all of this is for ?\n"
+            "What you have done ?"
+        )
     
     def update(self, dt):
         super().update(dt)
