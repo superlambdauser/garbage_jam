@@ -116,9 +116,9 @@ RED_BUTTON_CONFIG = {
     }
 
 # START BUTTON 
-START_BTN_IMAGES = ["buttons/red_button_off.png",
-                  "buttons/red_button_on.png",
-                  "buttons/red_button_pressed.png"]
+START_BTN_IMAGES = ["buttons/start_btn.png",
+                    "buttons/start_btn.png",
+                    "buttons/start_btn_pressed.png"]
 
 START_BTN_CONFIG = {
     "images":START_BTN_IMAGES,
