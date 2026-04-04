@@ -38,13 +38,14 @@ class GameScene(scene.Scene) :
         self.first_garbage = True
         self.first_garbage_timer = 2.0  #2.0 for debug, keep at 15.0 normally
 
+
         # Objects :
         background = ZoomingBackground(
             image=self.assets.get("background.png"),
             position=SCREEN_CENTER, 
             layer=BACKGROUND_LAYER)
         
-        cockpit = Cockpit(
+        self.cockpit = Cockpit(
             image=self.assets.get("cockpit.png"),
             position=SCREEN_CENTER,  
             layer=COCKPIT_LAYER)
@@ -177,10 +178,10 @@ class GameScene(scene.Scene) :
         # Store garbage spawned in a list :
         self.garbage_on_screen.append(garbage)
 
-    def on_garbage_collision(self) :
-        # self.cockpit.take_damage(damage)
+    def on_garbage_collision(self, damage) :
+        self.cockpit.take_damage(damage)
         print("OUCH")
-        pass
+        
 
     # Buttons 
     def set_all_buttons_to_decoys(self) :
@@ -222,7 +223,7 @@ class Garbage(go.ZoomingRotatingObject):
     def update(self, dt):
         super().update(dt)
         if self.scale > self.max_scale:
-            EventBus.emit("garbage_escaped")
+            EventBus.emit("garbage_escaped", damage =10)
             # Damage ship
 
             #should be smthing like : cockpit.take_damage(damage)
