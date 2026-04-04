@@ -15,12 +15,17 @@ SCREEN_HEIGHT = 600
 SCREEN_SIZE = (SCREEN_WIDTH, SCREEN_HEIGHT)
 SCREEN_CENTER = (SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2)
 
-#Layers :
+#Game Layers :
 BACKGROUND_LAYER = 0
 GARBAGE_LAYER = 1
 RETICLES_LAYER = 2
 COCKPIT_LAYER = 3
 BUTTONS_LAYER = 4
+
+#Start layers:
+START_BG_LAYER = 0
+START_IMAGE_LAYER = 1
+START_BUTTON_LAYER = 2
 
 # Reticles directions/speed :
 RETICLE_SPEED = 200.0 # Pixels per millisecond
@@ -48,7 +53,7 @@ class GameScene(scenes.Scene) :
         #music :
         pg.mixer.init()
         pg.mixer.music.load("assets/sound/ambient_horror.wav")
-        pg.mixer.music.set_volume(0.5)
+        pg.mixer.music.set_volume(0.3)
         pg.mixer.music.play()
 
         # Events :
@@ -165,10 +170,9 @@ class GameScene(scenes.Scene) :
             if self.first_garbage_timer <= 0:
                 self.first_garbage = False
     
-    def on_game_over(self, score) :
-        self.final_score = score
-        scores.update_best(score)
-        scenes.SceneManager().switch(GameOverScene(score=score))
+    def on_game_over(self) :
+        scores.update_best(score=self.score)
+        scenes.SceneManager().switch(GameOverScene(score=self.score))
 
     # Garbage
     def random_interval(self) :
@@ -244,9 +248,58 @@ class GameScene(scenes.Scene) :
         self.set_all_buttons_to_decoys()
         self.set_random_buttons_active()
 
-class GameOverScene(scenes.Scene) :
+
+class StartScene(scenes.Scene):
     def load(self):
-        return super().load()
+        self.button_timer = 5
+        
+        self.start_background = ZoomingBackground(
+            image=self.assets.get("background1.png"),
+            position=SCREEN_CENTER,
+            layer=START_BG_LAYER)
+        
+        self.post_it = go.GameObject(
+            image=self.assets.get("post_its/post_it_remember.png"),
+            position=(820,480),
+            layer=START_IMAGE_LAYER)
+        
+        self.family_portait = go.GameObject(
+            image=self.assets.get("family_drawing.png"),
+            position=SCREEN_CENTER,
+            layer=START_IMAGE_LAYER)
+        
+        self.start_button = Button(images=[self.assets.get(img) for img in configs.START_BTN_CONFIG["images"]],
+                                   position=configs.START_BTN_CONFIG["position"],
+                                   layer=START_BUTTON_LAYER)
+        self.start_button.is_active = False
+    
+    def update(self, dt):
+        super().update(dt)
+        self.button_timer -= dt
+        if self.button_timer <=0:
+            self.start_button.is_active = True
+        
+        if self.start_button.is_active and self.start_button.is_clicked:
+            scenes.SceneManager().switch(GameScene())
+
+class GameOverScene(scenes.Scene) :
+    def __init__(self, score):
+        self.final_score = score
+        self.best_score = scores.best_score
+
+        super().__init__()
+    def load(self):
+        self.end_background = ZoomingBackground(
+            image=self.assets.get("background1.png"),
+            position=SCREEN_CENTER,
+            layer=START_BG_LAYER)
+        
+        self.game_over_txt = TextObject(
+            position=(600,300),
+            layer=START_IMAGE_LAYER,
+            font_size= 100,
+            text="GAME OVER"
+        )
     
 # Game Objects :
 class ZoomingBackground(go.ZoomingObject) :
@@ -277,7 +330,7 @@ class Garbage(go.ZoomingRotatingObject):
 class Cockpit(go.GameObject):
     def __init__(self, image, position, layer):
         super().__init__(image, position, layer)
-        self.cockpit_max_pv = 20
+        self.cockpit_max_pv = 2
         self.cockpit_actual_pv = self.cockpit_max_pv
 
     def take_damage(self,damage):
@@ -290,6 +343,7 @@ class Cockpit(go.GameObject):
             #launch game over
             print("game over")
             EventBus.emit("game_over")
+
 class Button(go.AnimatedObject, go.ClickableObject, go.OutlineHoverEffectObjects):
     def __init__(self, images, position, layer, frame_duration = 0.1):
         super().__init__(images, position, layer, frame_duration)
@@ -453,8 +507,12 @@ class TextObject(go.GameObject) :
     
     def set_text(self, text:str) :
         self.image = self._render(text)
-        self.rect = self.image.get_rect(midright=self.anchor)
+        self.rect = self.image.get_rect(center=self.anchor)
 
 class ScoreDisplay(TextObject) :
     def set_text(self, text):
         super().set_text(self.set_text + text)
+    
+    def set_text(self, text:str) :
+        self.image = self._render(text)
+        self.rect = self.image.get_rect(midright=self.anchor)
