@@ -173,7 +173,7 @@ class GameScene(scene.Scene) :
         # Store garbage spawned in a list :
         self.garbage_on_screen.append(garbage)
 
-    def on_garbage_collision(self) :
+    def on_garbage_collision(self, damage) :
         # self.cockpit.take_damage(damage)
         print("OUCH")
         pass
@@ -214,7 +214,7 @@ class Garbage(go.ZoomingRotatingObject):
     def update(self, dt):
         super().update(dt)
         if self.scale > self.max_scale:
-            EventBus.emit("garbage_escaped")
+            EventBus.emit("garbage_escaped", damage=10)
             # Damage ship
             # ...
             # Then destroy self
