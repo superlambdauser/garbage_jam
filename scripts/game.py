@@ -33,10 +33,13 @@ class GameScene(scene.Scene) :
     def load(self) :
         self.spawn_timer = 0
         self.spawn_interval = self.random_interval()
-        self.garbage_on_screen = []
+        self.first_garbage_timer = 1.0
+
         self.reticles_snapped = False
         self.first_garbage = True
-        self.first_garbage_timer = 1.0
+        
+        self.garbage_on_screen = []
+        self.cracks = []
         
         # Events :
         self._register_events()
@@ -164,9 +167,17 @@ class GameScene(scene.Scene) :
         # Store garbage spawned in a list :
         self.garbage_on_screen.append(garbage)
 
+    def spawn_cracks(self, position):
+        cracks_folder = self.assets._base_path + "cracks/"
+        random_file_crack = random.choice(os.listdir(cracks_folder))
+
+        crack = go.GameObject(image=self.assets.get("cracks/" + random_file_crack), position=position, layer=RETICLES_LAYER)
+        self.cracks.append(crack)
+
     def on_garbage_collision(self, damage, position) :
         print("OUCH")
         self.cockpit.take_damage(damage)
+        self.spawn_cracks(position)
 
     def on_garbage_destroyed(self, garbage) :
         self.garbage_on_screen.remove(garbage)
@@ -175,7 +186,7 @@ class GameScene(scene.Scene) :
     def on_reticles_near(self):
         self.reticle_x.snap_to(self.reticle_y)
 
-    def on_reticles_snapped(self, position) :
+    def on_reticles_snapped(self) :
         self.viewfinder = Reticles(
                 image=self.assets.get("reticles/viewfinder.png"),
                 position = self.reticle_x.current_pos,
@@ -226,6 +237,7 @@ class Garbage(go.ZoomingRotatingObject):
     def __init__(self, scaling_speed = 0.03, max_scale = 3, **kwargs):
         super().__init__(scaling_speed, max_scale, **kwargs)
         self.damage = 10
+        self.last_pos = None
 
     def update(self, dt):
         super().update(dt)
@@ -234,7 +246,7 @@ class Garbage(go.ZoomingRotatingObject):
             self.destroy()
     
     def destroy(self):
-        EventBus.emit("garbage_destroyed", self)
+        EventBus.emit("garbage_destroyed", garbage=self)
         return super().destroy()
 
 
