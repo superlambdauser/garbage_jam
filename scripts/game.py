@@ -36,7 +36,7 @@ class GameScene(scene.Scene) :
         self.garbage_on_screen = []
         self.reticles_snapped = False
         self.first_garbage = True
-        self.first_garbage_timer = 1.0
+        self.first_garbage_timer = 15.0
         
         # Events :
         self._register_events()

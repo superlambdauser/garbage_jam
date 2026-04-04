@@ -37,8 +37,11 @@ class SceneManager :
     def __init__(self):
         self.current = None
 
-    def switch(self, scene) :
-        self.current = scene
+    def switch(self, new_scene) :
+        if self.current_scene:
+            self.current_scene.unload()  # cleanup listeners
+        self.current_scene = new_scene
+        self.current_scene.load()
 
     def handle_event(self, event) :
         self.current.handle_event(event)
@@ -68,7 +71,7 @@ class Scene :
 
     def _unregister_events(self):
         pass  # override only in subclasses that need it
-    
+
     def handle_event(self, event) :
         self._manager.handle_event(event)
     
