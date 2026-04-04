@@ -302,10 +302,17 @@ class GameOverScene(scenes.Scene) :
             layer=START_BG_LAYER)
         
         self.game_over_txt = TextObject(
-            position=SCREEN_CENTER,
+            position=(600,250),
             layer=START_IMAGE_LAYER,
             font_size= 100,
             text="GAME OVER"
+        )
+
+        self.score_display = TextObject(
+            position=(600, 350),
+            layer=START_IMAGE_LAYER,
+            font_size=50,
+            text=f"You collected {self.final_score} garbage. BEST : {self.best_score}"
         )
 
         self.restart_button = RestartButton(
