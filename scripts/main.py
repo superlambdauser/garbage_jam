@@ -1,5 +1,5 @@
 import pygame as pg
-import scene_management as scene
+import scene_management as scenes
 import game 
 
 SCREEN_WIDTH = 1200
@@ -21,7 +21,7 @@ screen = pg.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
 clock = pg.time.Clock()
 running = True
 
-scenes = scene.SceneManager()
+scenes = scenes.SceneManager()
 
 scenes.switch(game.StartScene()) # MenuScene later 
 
