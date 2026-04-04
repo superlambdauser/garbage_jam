@@ -45,8 +45,10 @@ class GameManager:
             
             for sprite in layer_sprites:
                 surface.blit(sprite.image, sprite.rect)
+                if isinstance(sprite, HoverEffectObject) and sprite.is_hovered():
+                    surface.blit(sprite.get_outline(), sprite.rect)
 
-# GameObject
+            # GameObject
 class GameObject(pg.sprite.Sprite):
     def __init__(self, image: pg.Surface, position:tuple, layer: int):
         """Wrapper for Sprite() objects.
@@ -60,6 +62,7 @@ class GameObject(pg.sprite.Sprite):
         self.image = image
         self.position = position
         self.rect = image.get_rect(center=position)
+        self.mask = pg.mask.from_surface(self.image)
         GameManager().add(self, layer=layer)
 
     def update(self, dt:float) :
@@ -120,6 +123,7 @@ class ZoomingRotatingObject(ZoomingObject, RotatingObject):
             int(self.original.get_height() * self.scale)
         ))
         self.image = pg.transform.rotate(zoomed, self.angle)
+        self.mask = pg.mask.from_surface(self.image)
         self.rect = self.image.get_rect(center=self.rect.center)
 
 # Interactive Objects :
@@ -131,10 +135,12 @@ class ClickableObject(InteractiveObject) :
     def __init__(self, image, position, layer):
         super().__init__(image, position, layer)
         self.is_clicked = False
-        
+    def is_hovered(self) -> bool:
+        return self.rect.collidepoint(pg.mouse.get_pos())
+    
     def handle_event(self, event):
         if event.type == pg.MOUSEBUTTONDOWN :
-            if self.rect.collidepoint(event.pos) :
+            if self.is_hovered() :
                 self.is_clicked = True
                 self.on_click()
         elif event.type == pg.MOUSEBUTTONUP :
@@ -183,13 +189,19 @@ class AnimatedObject(GameObject) :
             self.animate(dt)
     
 class HoverEffectObject(GameObject) :
-    def __init__(self, hover_image, image, position, layer):
-        super().__init__(image, position, layer)
-        self.original = image
-        self.hover_image = hover_image
-
-    def hover_effect(self) :
-        if self.rect.collidepoint(pg.mouse.get_pos()) :
-            self.image = self.hover_image
-        else : 
-            self.image = self.original
+    def is_hovered(self) -> bool :
+        mouse_pos = pg.mouse.get_pos()
+        if not self.rect.collidepoint(mouse_pos):
+            return False
+        local_x = mouse_pos[0] - self.rect.x
+        local_y = mouse_pos[1] - self.rect.y
+        return self.mask.get_at((local_x, local_y))
+    
+class OutlineHoverEffectObjects(HoverEffectObject) :
+    def get_outline(self, color=(255, 255, 255), thickness=2) :
+        if not hasattr(self, '_outline'):
+            outline_surf = pg.Surface(self.image.get_size(), pg.SRCALPHA)
+            for point in self.mask.outline():
+                pg.draw.circle(outline_surf, color, point, thickness) # Many small circles that mimic a thickened outline
+            self._outline = outline_surf
+        return self._outline

@@ -103,7 +103,8 @@ class GameScene(scene.Scene) :
         # Here goes events like so :
         # EventBus.on(event_name:str, callback:custom_method)
         EventBus.on("garbage_escaped", self.on_garbage_collision)
-        EventBus.on("reticles_snap",self.on_reticles_near)
+        EventBus.on("garbage_destroyed", self.on_garbage_destroyed)
+        EventBus.on("reticles_snap", self.on_reticles_snapped)
     
     def _unregister_event(self, event, callback):
         EventBus.off(event, callback)
@@ -115,33 +116,20 @@ class GameScene(scene.Scene) :
     def update(self, dt):
         super().update(dt)
         
-
         # Snapping reticles :
         if self.reticle_x.is_near(target=self.reticle_y, threshold=RETICLE_SNAPPING_THRESHOLD) and not self.reticles_snapped :
-            EventBus.emit("reticles_snap")
             self.reticles_snapped = True
-
-            self.viewfinder = Reticles(image=self.assets.get("reticles/viewfinder.png"),
-                                  position = self.reticle_x.current_pos,
-                                  layer=RETICLES_LAYER)
-
-            for button in self.buttons :
-                if button.is_active :
-                    button.set_reticle(self.viewfinder)
-
-            self.reticle_x.destroy()
-            self.reticle_y.destroy()
+            EventBus.emit("reticles_snap")
 
             self.red_button.set_active()
         
         #if garbage destroy : reset_buttons (later), reset reticles pos + unlink them
         if self.reticles_snapped :
             for garbage in self.garbage_on_screen :
-                if garbage.rect.collidepoint(self.viewfinder.current_pos) and self.red_button.is_clicked : 
+                if pg.sprite.collide_mask(garbage, self.viewfinder) and self.red_button.is_clicked : 
                     garbage.destroy()
                     
         # Respawning garbage logic :
-        
         self.spawn_timer += dt
         if self.spawn_timer >= self.spawn_interval and not self.first_garbage:
             self.spawn_timer = 0
@@ -155,7 +143,7 @@ class GameScene(scene.Scene) :
             if self.first_garbage_timer <= 0:
                 self.first_garbage = False
 
-    # Garbage 
+    # Garbage
     def random_interval(self) :
         return random.uniform(5.0, 7.0)
     
@@ -176,14 +164,31 @@ class GameScene(scene.Scene) :
         # Store garbage spawned in a list :
         self.garbage_on_screen.append(garbage)
 
-
-    def on_garbage_collision(self, damage) :
+    def on_garbage_collision(self, damage, position) :
         print("OUCH")
         self.cockpit.take_damage(damage)
-        
+
+    def on_garbage_destroyed(self, garbage) :
+        self.garbage_on_screen.remove(garbage)
+
+    # Reticles
     def on_reticles_near(self):
         self.reticle_x.snap_to(self.reticle_y)
 
+    def on_reticles_snapped(self, position) :
+        self.viewfinder = Reticles(
+                image=self.assets.get("reticles/viewfinder.png"),
+                position = self.reticle_x.current_pos,
+                layer=RETICLES_LAYER)
+
+        for button in self.buttons :
+            if button.is_active :
+                button.set_reticle(self.viewfinder)
+
+        self.reticle_x.destroy()
+        self.reticle_y.destroy()
+
+        self.red_button.set_active()
 
     # Buttons 
     def set_all_buttons_to_decoys(self) :
@@ -222,17 +227,15 @@ class Garbage(go.ZoomingRotatingObject):
         super().__init__(scaling_speed, max_scale, **kwargs)
         self.damage = 10
 
-
     def update(self, dt):
         super().update(dt)
         if self.scale > self.max_scale:
-            EventBus.emit("garbage_escaped", damage=self.damage)
-            # Damage ship
-
-            #should be smthing like : cockpit.take_damage(damage)
-            # ...
-            # Then destroy self
+            EventBus.emit("garbage_escaped", damage=self.damage, position=self.position)
             self.destroy()
+    
+    def destroy(self):
+        EventBus.emit("garbage_destroyed", self)
+        return super().destroy()
 
 
 class Cockpit(go.GameObject):
@@ -275,7 +278,7 @@ class Button(go.AnimatedObject, go.ClickableObject):
         else:
             self.image = self.images[0] # Resets to idle on release
         
-class ReticlesButton(Button) :
+class ReticlesButton(Button, go.OutlineHoverEffectObjects) :
     def __init__(self, images, position, layer, frame_duration:float=0.1):
         super().__init__(images, position, layer, frame_duration)
         self.reticle = None
