@@ -60,6 +60,15 @@ class Scene :
     def load(self) :
         raise NotImplementedError("Scenes must implement objects loading method load() !")
     
+    def unload(self):
+        self._unregister_events()
+
+    def _register_events(self):
+        pass  # override only in subclasses that need it
+
+    def _unregister_events(self):
+        pass  # override only in subclasses that need it
+    
     def handle_event(self, event) :
         self._manager.handle_event(event)
     
