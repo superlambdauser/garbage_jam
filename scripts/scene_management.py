@@ -58,7 +58,6 @@ class Scene :
     def __init__(self):
         self._manager.clear_all()
         self.assets = AssetsManager()
-        self.load()
     
     def load(self) :
         raise NotImplementedError("Scenes must implement objects loading method load() !")
