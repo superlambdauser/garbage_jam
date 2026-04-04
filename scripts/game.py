@@ -47,7 +47,7 @@ class GameScene(scene.Scene) :
             position=SCREEN_CENTER, 
             layer=BACKGROUND_LAYER)
         
-        cockpit = go.GameObject(
+        cockpit = Cockpit(
             image=self.assets.get("cockpit.png"),
             position=SCREEN_CENTER,  
             layer=COCKPIT_LAYER)
@@ -114,6 +114,7 @@ class GameScene(scene.Scene) :
 
     def update(self, dt):
         super().update(dt)
+        
 
         # Snapping reticles :
         if self.reticle_x.is_near(target=self.reticle_y, threshold=RETICLE_SNAPPING_THRESHOLD) and not self.reticles_snapped :
@@ -146,11 +147,17 @@ class GameScene(scene.Scene) :
             self.spawn_timer = 0
             self.spawn_interval = self.random_interval()
             self.spawn_garbage()    
+
+            #make first garbage spawn after x amount of time
         if self.first_garbage :
             # print("waiting")
             self.first_garbage_timer -= dt
             if self.first_garbage_timer <= 0:
                 self.first_garbage = False
+
+        
+
+
 
     # Garbage 
     def random_interval(self) :
@@ -211,14 +218,39 @@ class ZoomingBackground(go.ZoomingObject) :
             self.scale = self.min_scale
 
 class Garbage(go.ZoomingRotatingObject):
+    def __init__(self, scaling_speed = 0.03, max_scale = 3, **kwargs):
+        super().__init__(scaling_speed, max_scale, **kwargs)
+
+
     def update(self, dt):
         super().update(dt)
         if self.scale > self.max_scale:
             EventBus.emit("garbage_escaped", damage=10)
             # Damage ship
+
+            #should be smthing like : cockpit.take_damage(damage)
             # ...
             # Then destroy self
             self.destroy()
+
+
+class Cockpit(go.GameObject):
+    def __init__(self, image, position, layer):
+        super().__init__(image, position, layer)
+        self.cockpit_max_pv = 20
+        self.cockpit_actual_pv = self.cockpit_max_pv
+
+    def take_damage(self,damage):
+        self.cockpit_actual_pv -= damage
+        print(self.cockpit_actual_pv)
+
+    def update(self, dt):
+        super().update(dt)
+        if self.cockpit_actual_pv <= 0:
+            #launch game over
+            print("game over")
+    
+
 
 class Button(go.AnimatedObject, go.ClickableObject):
     def __init__(self, images, position, layer, frame_duration = 0.1):
