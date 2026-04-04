@@ -78,7 +78,7 @@ class GameScene(scenes.Scene) :
             text="0")
         
         self.hp_display = TextObject(
-            position=(1000, 425),
+            position=(1030, 425),
             layer=COCKPIT_LAYER,
             font_size=50,
             color=(150,0,75),
@@ -256,7 +256,7 @@ class GameScene(scenes.Scene) :
 
 class StartScene(scenes.Scene):
     def load(self):
-        self.button_timer = 3
+        self.button_timer = 2.0
         
         self.start_background = ZoomingBackground(
             image=self.assets.get("background1.png"),
