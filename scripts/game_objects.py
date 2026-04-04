@@ -198,10 +198,15 @@ class HoverEffectObject(GameObject) :
         return self.mask.get_at((local_x, local_y))
     
 class OutlineHoverEffectObjects(HoverEffectObject) :
-    def get_outline(self, color=(255, 255, 255), thickness=2) :
+    def __init__(self, image, position, layer):
+        super().__init__(image, position, layer)
+        self.color = (255, 255, 255) # White
+        self.thickness = 2
+
+    def get_outline(self,) :
         if not hasattr(self, '_outline'):
             outline_surf = pg.Surface(self.image.get_size(), pg.SRCALPHA)
             for point in self.mask.outline():
-                pg.draw.circle(outline_surf, color, point, thickness) # Many small circles that mimic a thickened outline
+                pg.draw.circle(outline_surf, self.color, point, self.thickness) # Many small circles that mimic a thickened outline
             self._outline = outline_surf
         return self._outline

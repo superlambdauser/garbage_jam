@@ -241,7 +241,7 @@ class ZoomingBackground(go.ZoomingObject) :
 class Garbage(go.ZoomingRotatingObject):
     def __init__(self, scaling_speed = 0.03, max_scale = 3, **kwargs):
         super().__init__(scaling_speed, max_scale, **kwargs)
-        self.damage = 10
+        self.damage = 1
         self.last_pos = None
 
     def update(self, dt):
@@ -272,7 +272,7 @@ class Cockpit(go.GameObject):
             print("game over")
     
 
-class Button(go.AnimatedObject, go.ClickableObject):
+class Button(go.AnimatedObject, go.ClickableObject, go.OutlineHoverEffectObjects):
     def __init__(self, images, position, layer, frame_duration = 0.1):
         super().__init__(images, position, layer, frame_duration)
         self.is_active = False
@@ -295,7 +295,7 @@ class Button(go.AnimatedObject, go.ClickableObject):
         else:
             self.image = self.images[0] # Resets to idle on release
         
-class ReticlesButton(Button, go.OutlineHoverEffectObjects) :
+class ReticlesButton(Button) :
     def __init__(self, images, position, layer, frame_duration:float=0.1):
         super().__init__(images, position, layer, frame_duration)
         self.reticle = None
@@ -334,7 +334,9 @@ class RedButton(Button) :
         self.is_active = False
         self.idle = images[0]
         self.images = [images[i] for i in range(1, len(images))] # Remove idle
-    
+
+        self.color = (179, 227, 28)
+
     def update(self, dt):
         if self.is_active :
             super().update(dt)
@@ -343,6 +345,10 @@ class RedButton(Button) :
         if self.is_active and garbage:
             garbage.destroy()
 
+    def is_hovered(self):
+        if self.is_active :
+            return super().is_hovered()
+        else : return False
 
 class Reticles(go.SnappingObject):
     def __init__(self, image, position, layer):
