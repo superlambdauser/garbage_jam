@@ -392,7 +392,6 @@ class Cockpit(go.GameObject):
     def __init__(self, image, position, layer):
         super().__init__(image, position, layer)
         self.cockpit_max_pv = 10
-        self.cockpit_max_pv = 10
         self.cockpit_actual_pv = self.cockpit_max_pv
 
     def take_damage(self,damage):
