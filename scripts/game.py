@@ -283,10 +283,10 @@ class StartScene(scenes.Scene):
             self.start_button.is_active = True
         
         if self.start_button.is_active and self.start_button.is_clicked:
-            scene.SceneManager().switch(GameScene())
+            scenes.SceneManager().switch(GameScene())
             
 
-class MenuScene(scene.Scene) :
+class MenuScene(scenes.Scene) :
     def load(self) :
         pass
 
